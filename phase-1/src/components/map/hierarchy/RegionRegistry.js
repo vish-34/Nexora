@@ -92,11 +92,13 @@ export class RegionRegistry {
       // Data-driven exit threshold: immediate exit when region shrinks to ~80% of comfortable framing
       const exitZoom = defaults.exitZoom || (fitZoom * 0.80);
 
+      const effectiveParentId = props.parentId || parentId;
+
       const region = new GeographicRegion({
         id,
         name: rawName,
         level: props.level || level,
-        parentId: parentId,
+        parentId: effectiveParentId,
         geometry: feature.geometry,
         geoBounds,
         geoCentroid,
@@ -114,8 +116,9 @@ export class RegionRegistry {
       this.register(region);
       createdRegions.push(region);
 
-      if (parent) {
-        parent.addChild(region);
+      const parentObj = this.get(effectiveParentId);
+      if (parentObj) {
+        parentObj.addChild(region);
       }
     }
 

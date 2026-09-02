@@ -8,7 +8,7 @@ The integration between **Phase 2 (MERN Core Backend & Geospatial DB)** and **Ph
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                 PHASE 1: FRONTEND HUD & APP                │
+│                 PHASE 1: FRONTEND HUD & APP                 │
 │                 (Port 5173 - React / Vite)                  │
 └──────────────────────────────┬──────────────────────────────┘
                                │
@@ -19,9 +19,9 @@ The integration between **Phase 2 (MERN Core Backend & Geospatial DB)** and **Ph
 │                                                             │
 │  - Micro-grid GIS features (/api/grid)                      │
 │  - Cooling Shelters + Turf spatial queries (/api/cooling-centers)
-│  - Citizen SOS Distress Feed + WebSocket (/api/reports)    │
-│  - Municipal What-If Policy Commitments (/api/proposals)   │
-│  - Live Open-Meteo Weather + WBGT (/api/weather/current)   │
+│  - Citizen SOS Distress Feed + WebSocket (/api/reports)     │
+│  - Municipal What-If Policy Commitments (/api/proposals)    │
+│  - Live Open-Meteo Weather + WBGT (/api/weather/current)    │
 │  - Reverse Proxy Gateway for AI Endpoints (/api/ai/*)       │
 └──────────────────────────────┬──────────────────────────────┘
                                │
@@ -31,7 +31,7 @@ The integration between **Phase 2 (MERN Core Backend & Geospatial DB)** and **Ph
 │               (Port 8000 - FastAPI + NetworkX)              │
 │                                                             │
 │  - Composite Heat Risk Score (CHRS) Engine                  │
-│  - Explainable AI (XAI) Hotspot Factor Decomposition       │
+│  - Explainable AI (XAI) Hotspot Factor Decomposition        │
 │  - What-If Urban Simulation Engine (ΔLST, CAPEX, CO₂)       │
 │  - CoolPath Microclimate A* Pedestrian Router               │
 │  - NLP Distress Classifier & Automated Protocol Triage      │

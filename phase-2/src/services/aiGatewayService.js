@@ -17,13 +17,13 @@ const TIMEOUT = Number(process.env.AI_SERVICE_TIMEOUT_MS || 2500);
 
 const isMockForced = () => String(process.env.USE_MOCK_AI).toLowerCase() === "true";
 
-async function explainZone(zoneId) {
-  if (isMockForced()) return mockXAI(zoneId);
+async function explainZone(zoneId, params = {}) {
+  if (isMockForced()) return mockXAI(zoneId, params);
   try {
-    const res = await axios.get(`${AI_BASE_URL}/api/ai/explain/${zoneId}`, { timeout: TIMEOUT });
+    const res = await axios.get(`${AI_BASE_URL}/api/ai/explain/${zoneId}`, { params, timeout: TIMEOUT });
     return res.data;
   } catch (err) {
-    return mockXAI(zoneId);
+    return mockXAI(zoneId, params);
   }
 }
 

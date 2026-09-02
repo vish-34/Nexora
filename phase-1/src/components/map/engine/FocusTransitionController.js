@@ -221,28 +221,28 @@ export class FocusTransitionController {
         shouldBeVisible = false;
       }
 
-      if (targetOpacity > 0) {
+      if (targetOpacity === 0) {
+        region.mesh.visible = false;
+        region.mesh.traverse((child) => {
+          if (child.material) {
+            gsap.killTweensOf(child.material);
+            child.material.opacity = 0.0;
+          }
+        });
+      } else {
         region.mesh.visible = true;
-      }
-
-      region.mesh.traverse((child) => {
-        if (child.isMesh && child.material) {
-          const currentOpacity = child.material.opacity;
-          if (Math.abs(currentOpacity - targetOpacity) > 0.03) {
+        region.mesh.traverse((child) => {
+          if (child.material) {
+            const targetChildOpacity = child.isLine ? 0.95 : targetOpacity;
             gsap.killTweensOf(child.material);
             gsap.to(child.material, {
-              opacity: targetOpacity,
+              opacity: targetChildOpacity,
               duration: duration,
-              ease: 'power2.out',
-              onComplete: () => {
-                if (targetOpacity === 0) {
-                  region.mesh.visible = shouldBeVisible;
-                }
-              }
+              ease: 'power2.out'
             });
           }
-        }
-      });
+        });
+      }
     }
   }
 }

@@ -12,7 +12,7 @@ const Z_OFFSETS = {
 };
 
 export class RegionGeometryFactory {
-  static createRegionMesh(region, color = 0x274e38, opacity = 0.8) {
+  static createRegionMesh(region, color = 0xe2e8f0, opacity = 0.8) {
     if (!region || !region.geometry || !region.geometry.coordinates) return null;
 
     const group = new THREE.Group();
@@ -29,10 +29,10 @@ export class RegionGeometryFactory {
     });
 
     const boundaryLineMat = new THREE.LineBasicMaterial({
-      color: new THREE.Color('#132820'),
-      linewidth: 1,
+      color: new THREE.Color('#ffffff'), // Clean crisp white borders
+      linewidth: 1.5,
       transparent: true,
-      opacity: Math.min(1.0, opacity + 0.3),
+      opacity: opacity > 0 ? 0.95 : 0.0,
       depthWrite: false
     });
 
@@ -103,6 +103,7 @@ export class RegionGeometryFactory {
     group.add(mesh);
 
     group.userData = { regionId: region.id, region };
+    group.visible = opacity > 0;
     region.mesh = group;
     return group;
   }

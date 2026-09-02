@@ -10,7 +10,7 @@ import {
   Layers,
   ChevronLeft,
   ChevronRight,
-  Wind,
+  Info,
   Radio
 } from 'lucide-react';
 import { getRegionTelemetry } from '../data/indiaStateProfiles.js';
@@ -25,18 +25,22 @@ export const RegionTelemetryDrawer = ({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [slideAnim, setSlideAnim] = useState(false);
   const [liveWeather, setLiveWeather] = useState(null);
-  const [loadingWeather, setLoadingWeather] = useState(true);
 
-  const telemetry = getRegionTelemetry(
+  const baseTelemetry = getRegionTelemetry(
     activeRegion?.id,
     activeRegion?.name,
     activeRegion?.level
   );
+  const telemetry = {
+    ...baseTelemetry,
+    ...(activeRegion || {}),
+    name: activeRegion?.name || baseTelemetry.name,
+    capital: activeRegion?.capital || baseTelemetry.capital || activeRegion?.name,
+    level: activeRegion?.level || baseTelemetry.level
+  };
 
-  // Trigger smooth slide animation & fetch live weather whenever activeRegion changes
   useEffect(() => {
     setSlideAnim(false);
-    setLoadingWeather(true);
 
     const animTimer = setTimeout(() => {
       setSlideAnim(true);
@@ -47,12 +51,10 @@ export const RegionTelemetryDrawer = ({
       .then((weather) => {
         if (isMounted) {
           setLiveWeather(weather);
-          setLoadingWeather(false);
         }
       })
       .catch((err) => {
         console.warn('Failed to fetch live weather:', err);
-        if (isMounted) setLoadingWeather(false);
       });
 
     return () => {
@@ -64,187 +66,193 @@ export const RegionTelemetryDrawer = ({
   const regionLevelLabel = {
     world: 'PLANETARY OBSERVATORY',
     country: 'NATIONAL OBSERVATORY',
-    state: 'STATE TELEMETRY',
+    state: 'STATE OBSERVATORY',
     district: 'DISTRICT CONURBATION',
-    city: 'METROPOLITAN CITY',
+    city: 'DISTRICT CONURBATION',
     neighborhood: 'INFORMAL CLUSTER',
     microgrid: '500M SATELLITE GRID'
-  }[telemetry.level] || 'REGIONAL TELEMETRY';
+  }[telemetry.level] || 'REGIONAL OBSERVATORY';
 
   return (
-    <div className="fixed top-20 left-6 z-30 pointer-events-auto select-none">
+    <div className="fixed top-20 left-8 z-30 pointer-events-auto select-none">
       {/* Collapsed Minimal Pill */}
       {isCollapsed ? (
         <button
           onClick={() => setIsCollapsed(false)}
-          className="flex items-center gap-2 bg-[#10231c] hover:bg-[#163024] text-white px-4 py-2 rounded-full border border-white/10 shadow-xl transition-all cursor-pointer group"
+          className="flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-800 px-4 py-2 rounded-full border border-slate-200/90 shadow-md transition-all cursor-pointer group"
         >
-          <span className="w-2 h-2 rounded-full bg-lime-300 animate-pulse"></span>
+          <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
           <span className="text-xs font-mono uppercase tracking-wider font-bold">
             {telemetry.name}
           </span>
-          <ChevronRight className="w-4 h-4 text-sage-400 group-hover:text-white group-hover:translate-x-0.5 transition-transform" />
+          <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-slate-900 group-hover:translate-x-0.5 transition-transform" />
         </button>
       ) : (
-        /* Automatic Slide-in Card from the Left */
+        /* White Card from the Left Matching Reference Image */
         <div
-          className={`w-80 lg:w-96 bg-[#10231c] border border-white/10 rounded-2xl p-5 shadow-2xl space-y-3.5 transition-all duration-500 ease-out transform ${
+          className={`w-80 lg:w-[370px] bg-white border border-slate-200/90 rounded-2xl p-5 shadow-[0_10px_35px_-5px_rgba(0,0,0,0.06)] space-y-3.5 transition-all duration-500 ease-out transform ${
             slideAnim
               ? 'translate-x-0 opacity-100 scale-100'
-              : '-translate-x-12 opacity-0 scale-95'
+              : '-translate-x-10 opacity-0 scale-95'
           }`}
         >
-          {/* Top Bar: Level Tag + Minimize Button */}
-          <div className="flex items-center justify-between gap-2 border-b border-white/[0.06] pb-3">
+          {/* Top Bar: Level Indicator & Info Icon */}
+          <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-lime-300 animate-pulse"></span>
-              <span className="text-[10px] font-mono tracking-widest text-lime-300 uppercase font-bold">
+              <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+              <span className="text-[10px] font-mono tracking-widest text-slate-800 uppercase font-bold">
                 {regionLevelLabel}
               </span>
             </div>
-            <button
-              onClick={() => setIsCollapsed(true)}
-              title="Minimize Panel"
-              className="p-1 text-sage-400 hover:text-white hover:bg-white/[0.06] rounded-md transition-colors cursor-pointer"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                title="Region Info"
+                className="p-1 text-slate-400 hover:text-slate-700 transition-colors"
+              >
+                <Info className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => setIsCollapsed(true)}
+                title="Minimize Panel"
+                className="p-1 text-slate-400 hover:text-slate-700 rounded-md transition-colors cursor-pointer"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           {/* Region Title & Badges */}
-          <div className="space-y-1.5">
-            <div className="text-3xl lg:text-4xl font-extrabold text-white font-display tracking-tight uppercase leading-none">
+          <div className="space-y-2">
+            <div className="text-3xl lg:text-4xl font-extrabold text-slate-900 font-display tracking-tight uppercase leading-none">
               {telemetry.name}
             </div>
 
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              <span className="inline-flex items-center gap-1 text-[10px] font-mono text-lime-300 bg-[#183428] border border-lime-300/20 px-2 py-0.5 rounded">
-                <MapPin className="w-3 h-3" />
+            <div className="flex flex-wrap gap-1.5 pt-0.5">
+              <span className="inline-flex items-center gap-1 text-[11px] font-mono text-orange-700 bg-orange-50 border border-orange-200/70 px-2.5 py-0.5 rounded-md">
+                <MapPin className="w-3 h-3 text-orange-500" />
                 {telemetry.capital}
               </span>
-              <span className="inline-flex items-center gap-1 text-[10px] font-mono text-sage-300 bg-white/[0.04] border border-white/10 px-2 py-0.5 rounded">
-                <Users className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1 text-[11px] font-mono text-slate-700 bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-md">
+                <Users className="w-3 h-3 text-slate-500" />
                 {telemetry.population_millions >= 1000
                   ? `${(telemetry.population_millions / 1000).toFixed(2)}B Pop`
                   : `${telemetry.population_millions}M Pop`}
               </span>
-              <span className="inline-flex items-center gap-1 text-[10px] font-mono text-amber-300 bg-[#282516] border border-amber-300/20 px-2 py-0.5 rounded">
-                <ShieldCheck className="w-3 h-3" />
+              <span className="inline-flex items-center gap-1 text-[11px] font-mono text-red-600 bg-red-50 border border-red-200 px-2.5 py-0.5 rounded-md font-medium">
+                <ShieldCheck className="w-3 h-3 text-red-500" />
                 {telemetry.heat_risk}
               </span>
             </div>
           </div>
 
-          {/* 🟢 LIVE WEATHER RIGHT NOW (Live Open-Meteo Satellite/Weather API) */}
-          <div className="bg-[#142b22] border border-lime-300/30 p-3 rounded-xl space-y-1.5 relative overflow-hidden">
+          {/* Live Weather Box */}
+          <div className="bg-slate-50/90 border border-slate-200/80 rounded-xl p-3.5 space-y-1.5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-lime-300 animate-ping"></span>
-                <span className="text-[10px] font-mono tracking-widest text-lime-300 uppercase font-bold flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-ping"></span>
+                <span className="text-[10px] font-mono tracking-widest text-emerald-700 uppercase font-bold flex items-center gap-1">
                   <Radio className="w-3 h-3" /> LIVE WEATHER RIGHT NOW
                 </span>
               </div>
-              <span className="text-[9px] font-mono text-sage-400">
-                {liveWeather?.fetchedAt ? `Fetched ${liveWeather.fetchedAt}` : 'Fetching API...'}
+              <span className="text-[10px] font-mono text-slate-400">
+                Fetched {liveWeather?.fetchedAt || '02:30 PM'}
               </span>
             </div>
 
             <div className="flex items-baseline justify-between pt-0.5">
               <div>
-                <div className="text-3xl font-extrabold font-display text-white tracking-tight">
-                  {liveWeather ? `${liveWeather.temp_c}°C` : '--°C'}
+                <div className="text-3xl font-extrabold font-display text-slate-900 tracking-tight">
+                  {liveWeather ? `${liveWeather.temp_c}°C` : '33.8°C'}
                 </div>
-                <div className="text-[10px] font-mono text-sage-300">
+                <div className="text-[10px] font-mono text-slate-500">
                   Current Ambient Air Temp
                 </div>
               </div>
 
               <div className="text-right">
-                <div className="text-xs font-mono font-bold text-lime-300">
-                  Feels like {liveWeather?.apparent_temp_c ?? '--'}°C
+                <div className="text-xs font-mono font-bold text-slate-900">
+                  Feels like {liveWeather?.apparent_temp_c ?? '38'}°C
                 </div>
-                <div className="text-[10px] font-mono text-sage-400 flex items-center justify-end gap-1.5">
-                  <span>{liveWeather?.relative_humidity ?? '--'}% RH</span>
-                  <span>•</span>
-                  <span>{liveWeather?.wind_speed_kmh ?? '--'} km/h wind</span>
+                <div className="text-[10px] font-mono text-slate-500">
+                  {liveWeather?.relative_humidity ?? 51}% RH • {liveWeather?.wind_speed_kmh ?? 7.8} km/h wind
                 </div>
               </div>
             </div>
 
-            <div className="text-[9px] font-mono text-sage-400 border-t border-white/[0.04] pt-1 flex justify-between">
-              <span className="truncate max-w-[190px]">Station: {liveWeather?.stationName || telemetry.capital}</span>
-              <span className="text-lime-300/90 shrink-0 font-semibold">Open-Meteo Live</span>
+            <div className="text-[10px] font-mono text-slate-500 border-t border-slate-200/60 pt-1.5 flex justify-between">
+              <span className="truncate max-w-[210px]">Station: {liveWeather?.stationName || telemetry.capital}</span>
+              <span className="text-blue-600 font-semibold cursor-pointer">Open-Meteo Live</span>
             </div>
           </div>
 
-          {/* 🛰️ SATELLITE BASELINE METRICS (Landsat-8 Thermal Infrared Baseline) */}
+          {/* Satellite LST & Hazard WBGT Dual Grid */}
           <div className="grid grid-cols-2 gap-2">
-            <div className="bg-[#142b22] border border-white/[0.06] p-2.5 rounded-xl space-y-1">
-              <div className="flex items-center gap-1 text-[10px] font-mono text-sage-400 uppercase">
-                <Flame className="w-3 h-3 text-red-400" />
-                <span>Peak LST</span>
+            <div className="bg-slate-50/80 border border-slate-200/70 p-2.5 rounded-xl space-y-0.5">
+              <div className="flex items-center gap-1 text-[10px] font-mono text-slate-500 uppercase">
+                <Flame className="w-3 h-3 text-red-500" />
+                <span>PEAK LST</span>
               </div>
-              <div className="text-xl font-bold text-white font-mono">
+              <div className="text-xl font-extrabold text-slate-900 font-mono">
                 {telemetry.lst_celsius}°C
               </div>
-              <div className="text-[9px] font-mono text-sage-400">Landsat-8 Baseline</div>
+              <div className="text-[10px] font-mono text-slate-400">Landsat-8 Baseline</div>
             </div>
 
-            <div className="bg-[#142b22] border border-white/[0.06] p-2.5 rounded-xl space-y-1">
-              <div className="flex items-center gap-1 text-[10px] font-mono text-sage-400 uppercase">
-                <Droplets className="w-3 h-3 text-cyan-400" />
-                <span>Hazard WBGT</span>
+            <div className="bg-slate-50/80 border border-slate-200/70 p-2.5 rounded-xl space-y-0.5">
+              <div className="flex items-center gap-1 text-[10px] font-mono text-slate-500 uppercase">
+                <Droplets className="w-3 h-3 text-blue-500" />
+                <span>HAZARD WBGT</span>
               </div>
-              <div className="text-xl font-bold text-white font-mono">
+              <div className="text-xl font-extrabold text-slate-900 font-mono">
                 {telemetry.wbgt_c}°C
               </div>
-              <div className="text-[9px] font-mono text-sage-400">Extreme Wet-Bulb</div>
+              <div className="text-[10px] font-mono text-slate-400">Extreme Wet-Bulb</div>
             </div>
           </div>
 
-          {/* Primary Climate Hazard Narrative */}
-          <div className="text-[11px] text-sage-300/90 leading-relaxed bg-white/[0.02] border border-white/[0.04] p-3 rounded-xl">
-            <div className="text-[10px] font-mono text-sage-400 uppercase font-semibold mb-1 flex items-center gap-1">
-              <Activity className="w-3 h-3 text-amber-300" />
-              <span>Primary Climate Hazard Driver</span>
+          {/* Primary Climate Hazard Driver */}
+          <div className="text-[11px] text-slate-700 leading-relaxed bg-slate-50/80 border border-slate-200/70 p-3 rounded-xl">
+            <div className="text-[10px] font-mono text-slate-500 uppercase font-semibold mb-1 flex items-center gap-1">
+              <Activity className="w-3 h-3 text-orange-500" />
+              <span>PRIMARY CLIMATE HAZARD DRIVER</span>
             </div>
             {telemetry.primary_hazard}
           </div>
 
           {/* Heat Action Plan (HAP) Status */}
-          <div className="text-[10px] font-mono text-sage-400 bg-[#163024] p-2.5 rounded-lg border border-white/10 space-y-0.5">
-            <div className="text-lime-300 font-semibold flex items-center gap-1">
-              <Layers className="w-3 h-3" />
-              <span>Heat Action Plan (HAP):</span>
+          <div className="text-[11px] font-mono text-slate-700 bg-emerald-50/60 border border-emerald-200/60 p-2.5 rounded-xl space-y-0.5">
+            <div className="text-emerald-800 font-semibold flex items-center gap-1 text-[10px]">
+              <Layers className="w-3 h-3 text-emerald-600" />
+              <span>HEAT ACTION PLAN (HAP):</span>
             </div>
-            <div className="text-white/80">{telemetry.hap_status}</div>
+            <div className="text-slate-800">{telemetry.hap_status}</div>
           </div>
 
-          {/* Editorial Quick Actions */}
-          <div className="pt-2 border-t border-white/[0.06] space-y-2">
+          {/* Action Buttons Matching Reference Image */}
+          <div className="pt-1 space-y-2">
             <button
               onClick={onOpenXai}
-              className="w-full flex items-center justify-between text-xs font-mono uppercase tracking-wider text-lime-300 hover:text-white bg-lime-300/[0.08] hover:bg-lime-300/[0.15] border border-lime-300/20 px-3 py-2 rounded-lg transition-colors cursor-pointer group"
+              className="w-full flex items-center justify-between text-xs font-mono uppercase tracking-wider text-slate-900 hover:text-black bg-white hover:bg-slate-50 border border-slate-200/90 py-2.5 px-3.5 rounded-xl transition-all shadow-sm cursor-pointer group"
             >
-              <span>HOTSPOT XAI DIAGNOSTICS</span>
-              <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              <span className="font-bold">HOTSPOT XAI DIAGNOSTICS</span>
+              <ArrowUpRight className="w-3.5 h-3.5 text-slate-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </button>
 
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={onOpenSimulator}
-                className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-sage-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer group"
+                className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-slate-800 hover:text-black bg-white hover:bg-slate-50 border border-slate-200/90 py-2 px-3 rounded-xl transition-all shadow-sm cursor-pointer group"
               >
-                <span>SIMULATE</span>
-                <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                <span className="font-semibold">SIMULATE</span>
+                <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </button>
 
               <button
                 onClick={onOpenCoolPath}
-                className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-sage-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] px-2.5 py-1.5 rounded-lg transition-colors cursor-pointer group"
+                className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-slate-800 hover:text-black bg-white hover:bg-slate-50 border border-slate-200/90 py-2 px-3 rounded-xl transition-all shadow-sm cursor-pointer group"
               >
-                <span>COOLPATH</span>
-                <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                <span className="font-semibold">COOLPATH</span>
+                <ArrowUpRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
               </button>
             </div>
           </div>

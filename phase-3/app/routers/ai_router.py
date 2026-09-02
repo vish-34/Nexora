@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import APIRouter, HTTPException
 from app.models.schemas import (
     XaiExplanationResponse,
@@ -19,9 +20,15 @@ from app.services.rag_engine import generate_screen_explanation
 router = APIRouter(prefix="/api/ai", tags=["AI Engine"])
 
 @router.get("/explain/{zone_id}", response_model=XaiExplanationResponse)
-def get_zone_explanation(zone_id: str):
+def get_zone_explanation(
+    zone_id: str,
+    lst: Optional[float] = None,
+    canopy: Optional[float] = None,
+    chrs: Optional[float] = None,
+    name: Optional[str] = None
+):
     try:
-        return generate_xai_explanation(zone_id)
+        return generate_xai_explanation(zone_id, lst=lst, canopy=canopy, chrs=chrs, name=name)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

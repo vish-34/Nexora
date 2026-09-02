@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -9,41 +9,31 @@
   --font-display: 'Outfit', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  --bg-moss-darkest: #10231c;
-  --bg-moss-darker: #132820;
-  --bg-moss-surface: #18342a;
-  --bg-moss-elevated: #1e3f33;
+  /* Reference Image Light Theme Palette */
+  --bg-main: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-subtle: #f1f5f9;
+  --border-card: #e2e8f0;
+  --border-subtle: #edf2f7;
 
-  --lime-accent: #dff279;
-  --lime-muted: #b8cc62;
-  --sage-text: #9bb7a5;
-  --sage-light: #d8e5dc;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
 
-  --grid-line: rgba(255, 255, 255, 0.04);
+  --accent-orange: #f97316;
+  --accent-red: #ef4444;
+  --accent-blue: #3b82f6;
+  --accent-green: #22c55e;
+  --accent-amber: #f59e0b;
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--bg-moss-darker);
-  color: #f7faf8;
+  background-color: var(--bg-main);
+  color: var(--text-primary);
   min-height: 100vh;
   overflow-x: hidden;
   position: relative;
-}
-
-/* Subtle background vertical grid lines matching reference photo */
-.editorial-grid-bg {
-  position: relative;
-}
-
-.editorial-grid-bg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: linear-gradient(to right, var(--grid-line) 1px, transparent 1px);
-  background-size: calc(100% / 12) 100%;
-  z-index: 1;
 }
 
 h1, h2, h3, h4, h5, .font-display {
@@ -54,158 +44,58 @@ h1, h2, h3, h4, h5, .font-display {
   font-family: var(--font-mono);
 }
 
-/* Glassmorphism Classes for Moss Palette */
-.moss-panel {
-  background: rgba(19, 40, 32, 0.75);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+/* Light Mode Card Styling matching Reference Image */
+.light-card {
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05), 0 4px 12px -2px rgba(0, 0, 0, 0.02);
+  border-radius: 18px;
 }
 
-.moss-card {
-  background: rgba(24, 52, 42, 0.65);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 8px;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+.light-card-inset {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
 }
 
-.moss-card:hover {
-  border-color: rgba(223, 242, 121, 0.3);
-  transform: translateY(-2px);
-}
-
-/* Minimal Custom Scrollbar */
+/* Clean Custom Scrollbar for Light Theme */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(16, 35, 28, 0.5);
+  background: #f1f5f9;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(155, 183, 165, 0.25);
-  border-radius: 3px;
+  background: #cbd5e1;
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--lime-accent);
+  background: #94a3b8;
 }
 
-/* Minimalist Slider Styling */
+/* Minimalist Range Slider for Light Theme */
 input[type="range"] {
   -webkit-appearance: none;
-  appearance: none;
-  background: rgba(255, 255, 255, 0.1);
+  background: #e2e8f0;
   height: 4px;
   border-radius: 2px;
-  outline: none;
 }
 
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  appearance: none;
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: var(--lime-accent);
+  background: #0f172a;
   cursor: pointer;
-  box-shadow: 0 0 8px rgba(223, 242, 121, 0.5);
-  transition: transform 0.15s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s ease;
 }
 
 input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.25);
-}
-
-/* Leaflet Container & Dark Moss Tiles */
-.leaflet-container {
-  background-color: transparent !important;
-  font-family: var(--font-sans) !important;
-  width: 100% !important;
-  height: 100% !important;
-}
-
-/* Tone down map tiles into deep moss monochromatic base */
-.leaflet-tile {
-  filter: brightness(0.45) invert(1) contrast(1.6) hue-rotate(100deg) saturate(0.25) !important;
-  opacity: 0.75 !important;
-}
-
-.leaflet-popup-content-wrapper {
-  background: rgba(19, 40, 32, 0.95) !important;
-  color: #f7faf8 !important;
-  backdrop-filter: blur(16px) !important;
-  border: 1px solid rgba(223, 242, 121, 0.2) !important;
-  border-radius: 8px !important;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5) !important;
-}
-
-.leaflet-popup-tip {
-  background: rgba(19, 40, 32, 0.95) !important;
-}
-
-.leaflet-control-zoom {
-  border: none !important;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4) !important;
-  border-radius: 6px !important;
-  overflow: hidden;
-}
-
-.leaflet-control-zoom a {
-  background-color: rgba(19, 40, 32, 0.9) !important;
-  color: #dff279 !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
-  width: 28px !important;
-  height: 28px !important;
-  line-height: 28px !important;
-}
-
-.leaflet-control-zoom a:hover {
-  background-color: #1b3c30 !important;
-  color: #ffffff !important;
-}
-
-/* Minimal Pulse Indicator */
-.pulse-lime {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  background-color: var(--lime-accent);
-  border-radius: 50%;
-  box-shadow: 0 0 0 0 rgba(223, 242, 121, 0.7);
-  animation: pulse-lime-anim 2s infinite;
-}
-
-@keyframes pulse-lime-anim {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(223, 242, 121, 0.7);
-  }
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 6px rgba(223, 242, 121, 0);
-  }
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(223, 242, 121, 0);
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  transform: scale(1.2);
 }

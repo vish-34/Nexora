@@ -1,21 +1,38 @@
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 from app.data.mumbai_grid import get_zone, REGIONAL_MEDIANS
 from app.models.schemas import XaiDriver, XaiExplanationResponse
 
-def generate_xai_explanation(zone_id: str) -> XaiExplanationResponse:
+def generate_xai_explanation(
+    zone_id: str,
+    lst: Optional[float] = None,
+    canopy: Optional[float] = None,
+    chrs: Optional[float] = None,
+    name: Optional[str] = None
+) -> XaiExplanationResponse:
     zone = get_zone(zone_id)
     if not zone:
+        calc_chrs = chrs if chrs is not None else 75.0
         zone = {
             "zone_id": zone_id,
-            "name": f"Zone {zone_id}",
-            "lst_celsius": 41.5,
-            "chrs_risk_score": 75.0,
-            "risk_level": "High",
+            "name": name or f"Zone {zone_id}",
+            "lst_celsius": lst if lst is not None else 41.5,
+            "chrs_risk_score": calc_chrs,
+            "risk_level": "Critical" if calc_chrs >= 80 else ("High" if calc_chrs >= 65 else "Moderate"),
             "informal_housing_ratio": 0.60,
-            "canopy_cover_pct": 6.5,
+            "canopy_cover_pct": canopy if canopy is not None else 6.5,
             "drinking_water_access_score": 4.5,
-            "primary_hazard_driver": "Elevated surface heat and low canopy cover",
+            "primary_hazard_driver": "Elevated surface heat and localized climate vulnerability",
         }
+    else:
+        zone = dict(zone)
+        if lst is not None:
+            zone["lst_celsius"] = lst
+        if canopy is not None:
+            zone["canopy_cover_pct"] = canopy
+        if chrs is not None:
+            zone["chrs_risk_score"] = chrs
+        if name is not None:
+            zone["name"] = name
 
     lst = float(zone.get("lst_celsius", 38.0))
     informal = float(zone.get("informal_housing_ratio", 0.5))

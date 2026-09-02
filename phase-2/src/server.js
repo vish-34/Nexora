@@ -14,6 +14,7 @@ const reportRoutes = require("./routes/reportRoutes");
 const proposalRoutes = require("./routes/proposals.routes");
 const weatherRoutes = require("./routes/weatherRoutes");
 const aiRoutes = require("./routes/aiRoutes");
+const pinRoutes = require("./routes/pinRoutes");
 const { setWsBroadcaster } = require("./controllers/reportController");
 
 const app = express();
@@ -62,6 +63,7 @@ app.use(["/api/reports", "/api/v1/reports"], reportRoutes);
 app.use(["/api/proposals", "/api/v1/proposals"], proposalRoutes);
 app.use(["/api/weather", "/api/v1/weather"], weatherRoutes);
 app.use(["/api/ai", "/api/v1/ai"], aiRoutes);
+app.use(["/api/pins", "/api/v1/pins"], pinRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

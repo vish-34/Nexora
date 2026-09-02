@@ -8,11 +8,14 @@ import { XaiDrawer } from './components/XaiDrawer.jsx';
 import { WhatIfSimulator } from './components/WhatIfSimulator.jsx';
 import { CoolPathModal } from './components/CoolPathModal.jsx';
 import { ReportModal } from './components/ReportModal.jsx';
+import { SosDistressModal } from './components/SosDistressModal.jsx';
+import { AiCopilotCard } from './components/AiCopilotCard.jsx';
 import { api } from './services/api.js';
 
 export const App = () => {
   const [activeWard, setActiveWard] = useState('india');
   const [activePersona, setActivePersona] = useState('admin'); // 'admin' | 'citizen'
+  const [activeLayer, setActiveLayer] = useState(null); // null = default clean, 'chrs' | 'lst' | 'ndvi'
   const [weather, setWeather] = useState(null);
   const [shelters, setShelters] = useState([]);
   const [reports, setReports] = useState([]);
@@ -25,7 +28,9 @@ export const App = () => {
   const [isXaiOpen, setIsXaiOpen] = useState(false);
   const [isWhatIfOpen, setIsWhatIfOpen] = useState(false);
   const [isCoolPathOpen, setIsCoolPathOpen] = useState(false);
+  const [selectedPin, setSelectedPin] = useState(null);
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isDistressFeedOpen, setIsDistressFeedOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   // Navbar visibility state: slides up during map interaction, down on top hover
@@ -34,19 +39,23 @@ export const App = () => {
 
   const mapEngineRef = useRef(null);
 
+  const [aiStatus, setAiStatus] = useState(null);
+
   // Initial Data Fetch
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [weatherRes, shelterRes, reportRes] = await Promise.all([
+        const [weatherRes, shelterRes, reportRes, aiRes] = await Promise.all([
           api.getCurrentWeather(),
           api.getCoolingCenters(),
-          api.getCitizenReports()
+          api.getCitizenReports(),
+          api.getAiStatus()
         ]);
         setWeather(weatherRes);
         setShelters(shelterRes);
         setReports(reportRes);
+        setAiStatus(aiRes);
       } catch (err) {
         console.error('Error fetching platform data', err);
       } finally {
@@ -55,6 +64,41 @@ export const App = () => {
     };
 
     fetchData();
+
+    // Establish WebSocket Connection to Phase 2 Gateway for real-time SOS distress broadcasts
+    let ws = null;
+    try {
+      const wsUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000').replace(/^http/, 'ws');
+      ws = new WebSocket(wsUrl);
+
+      ws.onmessage = (event) => {
+        try {
+          const payload = JSON.parse(event.data);
+          if (
+            payload.event === 'distress_report_created' ||
+            payload.event === 'new_report' ||
+            payload.event === 'report_created'
+          ) {
+            const incoming = payload.data || payload.report;
+            if (incoming) {
+              setReports((prev) => [incoming, ...prev]);
+            }
+          }
+        } catch (e) {
+          // ignore keepalive messages
+        }
+      };
+
+      ws.onerror = (err) => {
+        console.warn('WebSocket connection error:', err);
+      };
+    } catch (err) {
+      console.warn('WebSocket not supported or server unavailable:', err);
+    }
+
+    return () => {
+      if (ws) ws.close();
+    };
   }, []);
 
   // Global mousemove tracker: when cursor is near the top (within 75px), slide navbar down!
@@ -92,8 +136,42 @@ export const App = () => {
     });
   };
 
+  const handleInspectPin = (pin) => {
+    if (!pin) return;
+    setSelectedPin(pin);
+
+    if (pin.action_type === 'xai' || pin.type === 'hotspot' || pin.type === 'vulnerability') {
+      setSelectedZone({
+        id: pin.id,
+        name: pin.name,
+        level: pin.level || 'district',
+        lst_celsius: pin.lst_celsius,
+        chrs_risk_score: pin.heat_risk,
+        canopy_cover_pct: pin.tree_count ? Math.min(35, Math.round(pin.tree_count / 100)) : 10,
+        tree_count: pin.tree_count,
+        tree_source: pin.tree_source,
+        region: pin.details
+      });
+      setIsXaiOpen(true);
+    } else if (pin.action_type === 'coolpath' || pin.type === 'cooling_centre') {
+      setIsCoolPathOpen(true);
+    } else if (pin.action_type === 'report' || pin.type === 'citizen_report') {
+      setIsDistressFeedOpen(true);
+    } else if (pin.action_type === 'whatif' || pin.type === 'low_veg' || pin.type === 'water_needed') {
+      setSelectedZone({
+        id: pin.id,
+        name: pin.name,
+        level: pin.level || 'district',
+        lst_celsius: pin.lst_celsius,
+        chrs_risk_score: pin.heat_risk,
+        tree_count: pin.tree_count
+      });
+      setIsWhatIfOpen(true);
+    }
+  };
+
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-[#132820] text-sage-100 font-sans select-none">
+    <div className="relative w-screen h-screen overflow-hidden bg-[#f8fafc] text-slate-900 font-sans select-none">
       {/* Invisible Top Hover Trigger Zone */}
       <div
         onMouseEnter={() => setIsNavbarVisible(true)}
@@ -118,6 +196,7 @@ export const App = () => {
         activePersona={activePersona}
         setActivePersona={setActivePersona}
         weather={weather}
+        aiStatus={aiStatus}
         onOpenReportModal={() => setIsReportModalOpen(true)}
         onOpenCoolPathModal={() => setIsCoolPathOpen(true)}
         onOpenWhatIfModal={() => setIsWhatIfOpen(true)}
@@ -140,6 +219,9 @@ export const App = () => {
             shelters={shelters}
             reports={reports}
             weather={weather}
+            aiStatus={aiStatus}
+            onOpenCoolPath={() => setIsCoolPathOpen(true)}
+            onOpenDistressFeed={() => setIsDistressFeedOpen(true)}
             onResetIndia={() => {
               setActiveWard('india');
               mapEngineRef.current?.resetView();
@@ -150,18 +232,18 @@ export const App = () => {
 
       {/* Citizen Persona: Emergency Cooling & Hydration Portal */}
       {activePersona === 'citizen' && (
-        <div className="fixed inset-0 top-20 z-40 overflow-y-auto px-4 py-6 bg-[#132820]/95 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-400">
-          <div className="max-w-3xl mx-auto">
-            <div className="flex items-center justify-between mb-4">
+        <div className="fixed inset-0 top-16 z-40 overflow-y-auto px-4 py-6 bg-slate-900/30 backdrop-blur-sm animate-in fade-in slide-in-from-bottom-4 duration-400">
+          <div className="max-w-3xl mx-auto bg-white border border-slate-200/90 rounded-2xl p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-lime-300 animate-ping"></span>
-                <span className="text-xs font-mono tracking-widest text-lime-300 uppercase font-bold">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+                <span className="text-xs font-mono tracking-widest text-slate-800 uppercase font-bold">
                   CITIZEN RELIEF & ADVISORY PORTAL
                 </span>
               </div>
               <button
                 onClick={() => setActivePersona('admin')}
-                className="text-xs font-mono uppercase tracking-wider text-sage-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] px-3 py-1.5 rounded-full border border-white/10 transition-all cursor-pointer"
+                className="text-xs font-mono uppercase tracking-wider text-slate-600 hover:text-slate-950 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-full border border-slate-200 transition-all cursor-pointer font-bold"
               >
                 RETURN TO ADMIN HUD
               </button>
@@ -169,8 +251,10 @@ export const App = () => {
 
             <CitizenMobileView
               shelters={shelters}
+              reports={reports}
               onOpenCoolPathModal={() => setIsCoolPathOpen(true)}
               onOpenReportModal={() => setIsReportModalOpen(true)}
+              onOpenDistressFeed={() => setIsDistressFeedOpen(true)}
             />
           </div>
         </div>
@@ -190,6 +274,10 @@ export const App = () => {
         ) : (
           <ThreeMapView
             activeRegionId={activeWard}
+            activeRegion={selectedZone}
+            activeLayer={activeLayer}
+            onLayerChange={setActiveLayer}
+            onInspectPin={handleInspectPin}
             onSelectRegion={(region) => {
               setSelectedZone({
                 ...(region.properties || {}),
@@ -207,6 +295,32 @@ export const App = () => {
           />
         )}
       </main>
+
+      {/* AI Climate Copilot (Floating in Bottom-Right Corner) */}
+      <AiCopilotCard
+        selectedZone={selectedZone}
+        activeLayer={activeLayer}
+        activePersona={activePersona}
+        weather={weather}
+        shelters={shelters}
+        reports={reports}
+        onSetMapLayer={(layer) => {
+          setActiveLayer(layer === 'default' ? null : layer);
+        }}
+        onOpenXai={() => setIsXaiOpen(true)}
+        onOpenSimulator={() => setIsWhatIfOpen(true)}
+        onOpenCoolPath={() => setIsCoolPathOpen(true)}
+        onSetPersona={setActivePersona}
+        onResetIndia={() => {
+          setActiveWard('india');
+          setActiveLayer(null);
+          mapEngineRef.current?.resetView();
+        }}
+        onFocusRegion={(regionId) => {
+          setActiveWard(regionId);
+          mapEngineRef.current?.focusRegion(regionId, { animateZoom: true, force: true });
+        }}
+      />
 
       {/* Slide-out Explainable AI (XAI) Drawer */}
       <XaiDrawer
@@ -231,6 +345,8 @@ export const App = () => {
       {/* CoolPath Microclimate Route Modal */}
       {isCoolPathOpen && (
         <CoolPathModal
+          activeRegion={selectedZone}
+          selectedPin={selectedPin}
           onClose={() => setIsCoolPathOpen(false)}
         />
       )}
@@ -238,8 +354,27 @@ export const App = () => {
       {/* Citizen SOS Distress Report Modal */}
       {isReportModalOpen && (
         <ReportModal
+          activeRegion={selectedZone}
           onClose={() => setIsReportModalOpen(false)}
           onReportSubmitted={handleReportSubmitted}
+        />
+      )}
+
+      {/* Live Community Distress Feed Modal */}
+      {isDistressFeedOpen && (
+        <SosDistressModal
+          reports={reports}
+          onClose={() => setIsDistressFeedOpen(false)}
+          onOpenReportModal={() => {
+            setIsDistressFeedOpen(false);
+            setIsReportModalOpen(true);
+          }}
+          onFocusReport={(report) => {
+            const coords = report.location?.coordinates || [report.location?.lng, report.location?.lat];
+            if (coords && coords[0]) {
+              mapEngineRef.current?.cameraController?.panTo(coords[0], coords[1], 80);
+            }
+          }}
         />
       )}
     </div>

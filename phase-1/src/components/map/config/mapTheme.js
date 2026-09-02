@@ -1,30 +1,30 @@
 export const mapTheme = {
-  background: '#132820',
-  gridLines: 'rgba(255, 255, 255, 0.04)',
+  background: '#f8fafc',
+  gridLines: 'rgba(0, 0, 0, 0.04)',
 
   colors: {
-    world: '#1a3627',
-    country: '#274e38',
-    state: '#3b6e4e',
-    city: '#4d7c43',
-    neighborhood: '#5a7d4a',
+    world: '#f1f5f9',
+    country: '#e2e8f0',
+    state: '#e2e8f0',
+    city: '#cbd5e1',
+    neighborhood: '#cbd5e1',
     
-    // Exact choropleth scale from reference image
+    // Light Theme Choropleth Scales
     risk: {
-      critical: '#dff279',  // Luminous Pale Lime (80-100)
-      high: '#cbe06c',      // Warm Lime (65-79)
-      moderate: '#8fae58',  // Olive Green (35-64)
-      low: '#3b684b'        // Deep Forest Green (0-34)
+      critical: '#ef4444',  // Vibrant Coral Red
+      high: '#f97316',      // Warm Orange
+      moderate: '#f59e0b',  // Amber
+      low: '#22c55e'        // Fresh Green
     },
 
-    activeHighlight: '#dff279',
-    boundary: '#132820',
-    boundaryHover: '#ffffff'
+    activeHighlight: '#0f172a',
+    boundary: '#ffffff',
+    boundaryHover: '#0f172a'
   },
 
   opacity: {
     active: 0.95,
-    sibling: 0.25,
+    sibling: 0.85,
     ancestor: 0.40,
     hidden: 0.0
   }

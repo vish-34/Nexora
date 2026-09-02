@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Plus, Navigation, SlidersHorizontal, ChevronDown } from 'lucide-react';
+import { Menu, Plus, Navigation, SlidersHorizontal, ChevronDown, Shield } from 'lucide-react';
 
 export const Navbar = ({
   activeWard,
@@ -69,52 +69,52 @@ export const Navbar = ({
     <header
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      className={`fixed top-0 left-0 right-0 z-50 w-full bg-transparent px-8 py-4 transition-all duration-500 ease-out ${
+      className={`fixed top-0 left-0 right-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-slate-200/90 px-8 py-3.5 shadow-sm transition-all duration-500 ease-out ${
         isVisible
           ? 'translate-y-0 opacity-100 pointer-events-auto'
           : '-translate-y-full opacity-0 pointer-events-none'
       }`}
     >
-      <div className="max-w-[1600px] mx-auto flex items-center justify-between gap-6">
-        {/* Left: Minimal Brand Mark (Clean Flat) */}
+      <div className="max-w-[1680px] mx-auto flex items-center justify-between gap-6">
+        {/* Left: Brand Mark */}
         <div className="flex items-center gap-3 shrink-0">
           <button
             aria-label="Menu"
-            className="p-1 text-sage-300 hover:text-white transition-colors cursor-pointer"
+            className="p-1 text-slate-600 hover:text-slate-950 transition-colors cursor-pointer"
           >
             <Menu className="w-5 h-5" />
           </button>
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold tracking-wider text-white font-display uppercase drop-shadow-sm">
+            <span className="text-sm font-bold tracking-tight text-slate-900 font-display uppercase">
               CoolNeighbour
             </span>
-            <span className="text-[10px] font-mono uppercase bg-[#183428] text-lime-300 px-1.5 py-0.5 rounded border border-white/10">
+            <span className="text-[10px] font-mono uppercase bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border border-slate-200 font-bold">
               AI
             </span>
           </div>
         </div>
 
-        {/* Center: Clean Flat Navigation (Core Tiers + State Dropdown) */}
-        <nav className="flex items-center gap-8 text-[12px] font-medium tracking-widest text-sage-300">
+        {/* Center: Core Tiers + State Dropdown + Persona Switcher */}
+        <nav className="flex items-center gap-7 text-[12px] font-semibold tracking-wider text-slate-500">
           {coreHierarchy.map((region) => {
             const isActive = activeWard === region.id;
             return (
               <button
                 key={region.id}
                 onClick={() => setActiveWard(region.id)}
-                className={`relative py-1 transition-colors hover:text-white uppercase cursor-pointer drop-shadow-sm ${
-                  isActive ? 'text-white font-bold' : 'text-sage-400 hover:text-sage-200'
+                className={`relative py-1 transition-colors uppercase cursor-pointer ${
+                  isActive ? 'text-slate-950 font-bold' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 {region.label}
                 {isActive && (
-                  <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-lime-300 rounded-full"></span>
+                  <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-slate-950 rounded-full"></span>
                 )}
               </button>
             );
           })}
 
-          {/* Clean Flat Dropdown for All 36 States & UTs */}
+          {/* Clean Dropdown for All 36 States & UTs */}
           <div className="relative inline-flex items-center">
             <select
               value={allIndianStates.some(s => s.id === activeWard) ? activeWard : ''}
@@ -122,42 +122,43 @@ export const Navbar = ({
                 if (e.target.value) setActiveWard(e.target.value);
               }}
               aria-label="Select Indian State"
-              className={`appearance-none bg-[#132820] hover:bg-[#183328] text-[11px] font-mono uppercase py-1.5 pl-3 pr-7 rounded-full border transition-all cursor-pointer focus:outline-none ${
+              className={`appearance-none bg-white hover:bg-slate-50 text-[11px] font-semibold uppercase py-1.5 pl-3.5 pr-8 rounded-full border transition-all cursor-pointer shadow-sm focus:outline-none ${
                 isStateSelected
-                  ? 'text-lime-300 border-lime-300/40 bg-[#163024]'
-                  : 'text-sage-300 border-white/10 hover:border-white/25'
+                  ? 'text-orange-600 border-orange-300 bg-orange-50/50 font-bold'
+                  : 'text-slate-700 border-slate-200 hover:border-slate-300'
               }`}
             >
-              <option value="" disabled className="bg-[#132820] text-sage-400">
+              <option value="" disabled className="bg-white text-slate-400">
                 {isStateSelected ? `STATE: ${selectedStateName?.toUpperCase()}` : 'SELECT STATE (36 UTs)'}
               </option>
               {allIndianStates.map((st) => (
-                <option key={st.id} value={st.id} className="bg-[#132820] text-white">
+                <option key={st.id} value={st.id} className="bg-white text-slate-900">
                   {st.label}
                 </option>
               ))}
             </select>
-            <ChevronDown className={`w-3.5 h-3.5 pointer-events-none absolute right-2.5 ${isStateSelected ? 'text-lime-300' : 'text-sage-400'}`} />
+            <ChevronDown className={`w-3.5 h-3.5 pointer-events-none absolute right-2.5 ${isStateSelected ? 'text-orange-500' : 'text-slate-400'}`} />
           </div>
 
-          {/* Responsive Segmented Persona Switcher (Admin HUD | Citizen View) */}
-          <div className="flex items-center bg-[#10231c] p-0.5 rounded-full border border-white/10">
+          {/* Segmented Persona Switcher (Admin HUD | Citizen View) */}
+          <div className="flex items-center bg-slate-100 p-0.5 rounded-full border border-slate-200/90 shadow-inner">
             <button
               onClick={() => setActivePersona('admin')}
-              className={`text-[10px] font-mono px-3 py-1 rounded-full transition-all cursor-pointer ${
+              className={`text-[11px] font-mono px-3.5 py-1 rounded-full transition-all cursor-pointer flex items-center gap-1.5 ${
                 activePersona === 'admin'
-                  ? 'bg-[#183428] text-lime-300 font-bold shadow-sm border border-lime-300/30'
-                  : 'text-sage-400 hover:text-white'
+                  ? 'bg-white text-slate-900 font-bold shadow-sm border border-slate-200/70'
+                  : 'text-slate-500 hover:text-slate-900'
               }`}
             >
-              ADMIN HUD
+              <Shield className="w-3 h-3 text-slate-700" />
+              <span>ADMIN HUD</span>
             </button>
             <button
               onClick={() => setActivePersona('citizen')}
-              className={`text-[10px] font-mono px-3 py-1 rounded-full transition-all cursor-pointer ${
+              className={`text-[11px] font-mono px-3.5 py-1 rounded-full transition-all cursor-pointer ${
                 activePersona === 'citizen'
-                  ? 'bg-[#183428] text-lime-300 font-bold shadow-sm border border-lime-300/30'
-                  : 'text-sage-400 hover:text-white'
+                  ? 'bg-white text-slate-900 font-bold shadow-sm border border-slate-200/70'
+                  : 'text-slate-500 hover:text-slate-900'
               }`}
             >
               CITIZEN
@@ -165,35 +166,35 @@ export const Navbar = ({
           </div>
         </nav>
 
-        {/* Right: Clean Flat Controls (No Frosted Glass) */}
+        {/* Right: Weather Pill + CoolPath + SOS + Sliders */}
         <div className="flex items-center gap-3 shrink-0">
-          <div className="hidden xl:flex items-center gap-2 text-xs font-mono text-sage-300 bg-[#132820] border border-white/10 px-3 py-1.5 rounded-full">
-            <span className="pulse-lime"></span>
-            <span>WBGT {weather?.wbgt_c ?? 33.8}°C</span>
-            <span className="text-white/20">|</span>
-            <span className="text-lime-300/90 text-[11px] uppercase tracking-wider">HIGH HEAT</span>
+          <div className="hidden xl:flex items-center gap-2 text-xs font-mono text-slate-700 bg-white border border-slate-200/90 px-3.5 py-1.5 rounded-full shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-orange-500"></span>
+            <span>{weather?.temp_c ?? 33.8}°C</span>
+            <span className="text-slate-300">|</span>
+            <span className="text-orange-600 text-[11px] uppercase tracking-wider font-bold">HIGH HEAT</span>
           </div>
 
           <button
             onClick={onOpenCoolPathModal}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-lime-300 bg-[#1a382b] border border-lime-300/30 hover:bg-[#204535] transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200/90 shadow-sm transition-all cursor-pointer"
           >
-            <Navigation className="w-3.5 h-3.5" />
-            <span className="tracking-wide">CoolPath</span>
+            <Navigation className="w-3.5 h-3.5 text-slate-600" />
+            <span>CoolPath</span>
           </button>
 
           <button
             onClick={onOpenReportModal}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium text-white bg-[#1a382b] hover:bg-[#204535] border border-white/10 transition-all cursor-pointer"
+            className="flex items-center gap-1 px-3.5 py-1.5 rounded-full text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200/90 shadow-sm transition-all cursor-pointer"
           >
-            <Plus className="w-3.5 h-3.5" />
-            <span className="tracking-wide">SOS</span>
+            <Plus className="w-3.5 h-3.5 text-red-500" />
+            <span>SOS</span>
           </button>
 
           <button
             onClick={onOpenWhatIfModal}
             title="What-If Simulation Sandbox"
-            className="p-1.5 text-sage-300 hover:text-white bg-[#132820] hover:bg-[#183328] rounded-lg transition-colors border border-white/10 cursor-pointer"
+            className="p-2 text-slate-600 hover:text-slate-950 bg-white hover:bg-slate-50 rounded-lg transition-colors border border-slate-200/90 shadow-sm cursor-pointer"
           >
             <SlidersHorizontal className="w-4 h-4" />
           </button>

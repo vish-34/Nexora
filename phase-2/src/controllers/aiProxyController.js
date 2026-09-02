@@ -4,7 +4,7 @@ const aiGatewayService = require("../services/aiGatewayService");
 
 const explainZone = asyncHandler(async (req, res) => {
   const zoneId = req.params.zone_id || req.params.cellId;
-  const result = await aiGatewayService.explainZone(zoneId);
+  const result = await aiGatewayService.explainZone(zoneId, req.query);
   res.json(result);
 });
 

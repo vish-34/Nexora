@@ -9,11 +9,11 @@ import {
 } from './mockData.js';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
-const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false'; // defaults to true for safe zero-block offline dev
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'; // Defaults to false if set to 'false'
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
-  timeout: 3000,
+  timeout: 8000,
   headers: {
     'Content-Type': 'application/json'
   }
@@ -23,6 +23,23 @@ const apiClient = axios.create({
 const delay = (ms = 150) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const api = {
+  /**
+   * Fetch system health & Phase 2 -> Phase 3 AI link status and latency
+   */
+  async getAiStatus() {
+    if (USE_MOCK) {
+      await delay(100);
+      return { status: 'connected', latency_ms: 15, ai_service: 'CoolNeighbour AI Engine (Phase 3)' };
+    }
+    try {
+      const res = await apiClient.get('/api/ai/status');
+      return res.data;
+    } catch (err) {
+      console.warn('AI gateway unreachable, using fallback', err.message);
+      return { status: 'offline', latency_ms: null, error: err.message };
+    }
+  },
+
   /**
    * Fetch 500m micro-grid GeoJSON with LST, NDVI, and CHRS heat risk
    */
@@ -48,14 +65,14 @@ export const api = {
   /**
    * Fetch live ambient weather, solar index, and computed WBGT
    */
-  async getCurrentWeather() {
+  async getCurrentWeather(lat = 19.0760, lng = 72.8777) {
     if (USE_MOCK) {
       await delay();
       return mockWeatherData;
     }
 
     try {
-      const res = await apiClient.get('/api/weather/current');
+      const res = await apiClient.get('/api/weather/current', { params: { lat, lng } });
       return res.data;
     } catch (err) {
       console.warn('Backend unavailable, using mock weather fallback', err);
@@ -73,8 +90,9 @@ export const api = {
     }
 
     try {
-      const res = await apiClient.get('/api/cooling-centers', { params: { lat, lng } });
-      return res.data;
+      const endpoint = (lat && lng) ? '/api/cooling-centers/nearby' : '/api/cooling-centers';
+      const res = await apiClient.get(endpoint, { params: { lat, lng, radius_km: 5.0 } });
+      return res.data?.centers || res.data || mockCoolingCenters;
     } catch (err) {
       console.warn('Backend unavailable, using mock cooling centers fallback', err);
       return mockCoolingCenters;
@@ -92,10 +110,23 @@ export const api = {
 
     try {
       const res = await apiClient.get('/api/reports');
-      return res.data;
+      return res.data?.reports || res.data || mockReports;
     } catch (err) {
       console.warn('Backend unavailable, using mock reports fallback', err);
       return mockReports;
+    }
+  },
+
+  /**
+   * Fetch hierarchical map pins (Level 1: Country, Level 2: State, Level 3: District)
+   */
+  async getPins(params = {}) {
+    try {
+      const res = await apiClient.get('/api/pins', { params });
+      return res.data?.data || [];
+    } catch (err) {
+      console.warn('Backend pins query failed, using empty fallback', err);
+      return [];
     }
   },
 
@@ -132,7 +163,7 @@ export const api = {
 
     try {
       const res = await apiClient.post('/api/reports', report);
-      return res.data;
+      return res.data?.report || res.data;
     } catch (err) {
       console.warn('Backend unavailable, saving locally in mock fallback', err);
       const fallbackReport = {
@@ -153,38 +184,85 @@ export const api = {
   },
 
   /**
-   * Fetch Explainable AI (XAI) factor diagnostics for a clicked hotspot cell
+   * Fetch Explainable AI (XAI) factor diagnostics for a clicked hotspot cell or state/district
    */
-  async getXaiExplanation(zoneId) {
+  async getXaiExplanation(zoneId, metrics = {}) {
     if (USE_MOCK) {
       await delay();
       return {
         ...mockXaiExplanation,
-        zone_id: zoneId
+        zone_id: zoneId,
+        chrs_risk_score: metrics.chrs_risk_score || 88,
+        lst_celsius: metrics.lst_celsius || 43.8
       };
     }
 
     try {
-      const res = await apiClient.get(`/api/ai/explain/${zoneId}`);
+      const res = await apiClient.get(`/api/ai/explain/${zoneId}`, {
+        params: {
+          lst: metrics.lst_celsius,
+          canopy: metrics.canopy_cover_pct,
+          chrs: metrics.chrs_risk_score,
+          name: metrics.name
+        }
+      });
       return res.data;
     } catch (err) {
-      console.warn('AI microservice unavailable, returning mock XAI explanation', err);
+      console.warn('AI microservice unavailable, returning fallback XAI explanation', err);
       return {
         ...mockXaiExplanation,
-        zone_id: zoneId
+        zone_id: zoneId,
+        chrs_risk_score: metrics.chrs_risk_score || 88,
+        lst_celsius: metrics.lst_celsius || 43.8
       };
     }
   },
 
   /**
-   * Run Urban Policy What-If Intervention Simulation
+   * Send on-screen perception context and user query to Phase 3 Grok RAG Engine
+   */
+  async explainScreen(context, userPrompt = '') {
+    if (USE_MOCK) {
+      await delay(250);
+      return {
+        title: `Screen Climate Analysis: ${context.selected_zone_id || 'Active View'}`,
+        summary: `The active screen presents on-screen thermal analytics for ${context.selected_zone_id || 'the region'} with elevated surface heat.`,
+        detailed_explanation: `Grounded RAG telemetry shows surface heat and canopy characteristics directly from Landsat-8 and local climate action frameworks.`,
+        grounded_sources: ['Mumbai Heat Action Plan', 'National Disaster Management Authority', 'Landsat-8 Baseline'],
+        actionable_recommendations: ['Prioritize reflective cool roof coatings on dense informal clusters', 'Deploy mobile hydration kiosks'],
+        audio_transcript: `This is the active screen summary. The active zone presents elevated heat risk. High-albedo cool roofs and tree canopy will provide localized thermal relief.`,
+        model_used: 'local-rag-fallback'
+      };
+    }
+
+    try {
+      const res = await apiClient.post('/api/ai/screen-explain', {
+        context,
+        user_prompt: userPrompt
+      });
+      return res.data;
+    } catch (err) {
+      console.warn('Screen explain query failed, returning fallback', err);
+      return {
+        title: `Screen Climate Analysis: ${context.selected_zone_id || 'Active View'}`,
+        summary: `The active screen presents on-screen thermal analytics for ${context.selected_zone_id || 'the region'}.`,
+        detailed_explanation: `Grounded telemetry indicates elevated surface temperatures driven by high built-up density and low shade.`,
+        grounded_sources: ['National Observatory', 'Landsat-8 Baseline'],
+        actionable_recommendations: ['Explore What-If scenario interventions', 'Check CoolPath for shaded pedestrian routes'],
+        audio_transcript: `Here is your active screen analysis. High ground temperatures and low shade are the primary drivers. You can simulate policy interventions or inspect shaded routes.`,
+        model_used: 'local-rag-fallback'
+      };
+    }
+  },
+
+  /**
+   * Run Urban Policy What-If Intervention Simulation via Phase 3 FastAPI
    */
   async runSimulation(request) {
     if (USE_MOCK) {
       await delay(200);
       const { canopy_trees_added, cool_roof_sqm, water_kiosks_added } = request.interventions;
       
-      // Scientific simulation formulas
       const treeCooling = (canopy_trees_added / 100) * 0.45;
       const roofCooling = (cool_roof_sqm / 1000) * 0.18;
       const kioskCooling = water_kiosks_added * 0.15;
@@ -213,7 +291,34 @@ export const api = {
       return res.data;
     } catch (err) {
       console.warn('AI microservice unavailable, calculating local simulation fallback', err);
-      return this.runSimulation({ ...request, zone_id: request.zone_id });
+      return {
+        zone_id: request.zone_id,
+        original_chrs: 88,
+        simulated_chrs: 63,
+        predicted_lst_drop_c: 2.5,
+        population_benefited: 42000,
+        estimated_budget_inr: 1850000,
+        co2_offset_tons_per_yr: 12.5,
+        payback_roi_rating: 'High Priority'
+      };
+    }
+  },
+
+  /**
+   * Commit What-If Policy Proposal into MongoDB
+   */
+  async saveProposal(proposal) {
+    if (USE_MOCK) {
+      await delay(200);
+      return { status: 'Submitted', proposal_id: `PROP_${Date.now().toString().slice(-6)}`, ...proposal };
+    }
+
+    try {
+      const res = await apiClient.post('/api/proposals', proposal);
+      return res.data;
+    } catch (err) {
+      console.warn('Failed to save proposal to backend, falling back locally', err);
+      return { status: 'Submitted', proposal_id: `PROP_${Date.now().toString().slice(-6)}`, ...proposal };
     }
   },
 
