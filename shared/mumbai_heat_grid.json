@@ -1,0 +1,237 @@
+[
+  {
+    "zone_id": "GRID_MUM_001",
+    "cellId": "GRID_MUM_001",
+    "name": "Dharavi Sector 3 / Kumbharwada & Transit Camp",
+    "ward": "G/North",
+    "location": { "type": "Point", "coordinates": [72.8545, 19.0425] },
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [72.8520, 19.0400],
+          [72.8575, 19.0400],
+          [72.8575, 19.0455],
+          [72.8520, 19.0455],
+          [72.8520, 19.0400]
+        ]
+      ]
+    },
+    "polygon": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [72.8520, 19.0400],
+          [72.8575, 19.0400],
+          [72.8575, 19.0455],
+          [72.8520, 19.0455],
+          [72.8520, 19.0400]
+        ]
+      ]
+    },
+    "landCover": "slum_informal",
+    "lst_celsius": 44.8,
+    "surfaceTempC": 44.8,
+    "ndvi": 0.07,
+    "ndbi": 0.79,
+    "population_density": 68000,
+    "populationDensity": 68000,
+    "population_density_per_sqkm": 68000,
+    "elderly_percentage": 14.2,
+    "elderlyPct": 14.2,
+    "informal_housing_ratio": 0.84,
+    "canopy_cover_pct": 3.5,
+    "drinking_water_access_score": 3.2,
+    "chrs_risk_score": 89.4,
+    "risk_level": "Critical",
+    "primary_hazard_driver": "Extreme low albedo tin roofing & severe tree canopy deficit"
+  },
+  {
+    "zone_id": "GRID_MUM_002",
+    "cellId": "GRID_MUM_002",
+    "name": "Kurla West Station Hub & SG Barve Marg Transit Junction",
+    "ward": "L Ward",
+    "location": { "type": "Point", "coordinates": [72.8725, 19.0675] },
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [72.8700, 19.0650],
+          [72.8755, 19.0650],
+          [72.8755, 19.0705],
+          [72.8700, 19.0705],
+          [72.8700, 19.0650]
+        ]
+      ]
+    },
+    "polygon": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [72.8700, 19.0650],
+          [72.8755, 19.0650],
+          [72.8755, 19.0705],
+          [72.8700, 19.0705],
+          [72.8700, 19.0650]
+        ]
+      ]
+    },
+    "landCover": "dense_urban",
+    "lst_celsius": 42.6,
+    "surfaceTempC": 42.6,
+    "ndvi": 0.11,
+    "ndbi": 0.75,
+    "population_density": 54500,
+    "populationDensity": 54500,
+    "population_density_per_sqkm": 54500,
+    "elderly_percentage": 15.8,
+    "elderlyPct": 15.8,
+    "informal_housing_ratio": 0.65,
+    "canopy_cover_pct": 5.2,
+    "drinking_water_access_score": 4.5,
+    "chrs_risk_score": 82.7,
+    "risk_level": "Critical",
+    "primary_hazard_driver": "Heavy asphalt thermal radiation from transit junctions and pedestrian congestion"
+  },
+  {
+    "zone_id": "GRID_MUM_003",
+    "cellId": "GRID_MUM_003",
+    "name": "Bandra Kurla Complex (BKC) G-Block Corporate Zone",
+    "ward": "H/East",
+    "location": { "type": "Point", "coordinates": [72.8640, 19.0630] },
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [72.8600, 19.0600],
+          [72.8685, 19.0600],
+          [72.8685, 19.0665],
+          [72.8600, 19.0665],
+          [72.8600, 19.0600]
+        ]
+      ]
+    },
+    "polygon": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [72.8600, 19.0600],
+          [72.8685, 19.0600],
+          [72.8685, 19.0665],
+          [72.8600, 19.0665],
+          [72.8600, 19.0600]
+        ]
+      ]
+    },
+    "landCover": "dense_urban",
+    "lst_celsius": 38.6,
+    "surfaceTempC": 38.6,
+    "ndvi": 0.24,
+    "ndbi": 0.61,
+    "population_density": 17500,
+    "populationDensity": 17500,
+    "population_density_per_sqkm": 17500,
+    "elderly_percentage": 9.1,
+    "elderlyPct": 9.1,
+    "informal_housing_ratio": 0.05,
+    "canopy_cover_pct": 18.0,
+    "drinking_water_access_score": 8.8,
+    "chrs_risk_score": 52.3,
+    "risk_level": "Moderate",
+    "primary_hazard_driver": "Glass facade reflection countered by landscaped avenue tree corridors"
+  },
+  {
+    "zone_id": "GRID_MUM_004",
+    "cellId": "GRID_MUM_004",
+    "name": "Bandra West / Carter Road Coastal Fringe",
+    "ward": "H/West",
+    "location": { "type": "Point", "coordinates": [72.8290, 19.0585] },
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [72.8250, 19.0550],
+          [72.8335, 19.0550],
+          [72.8335, 19.0625],
+          [72.8250, 19.0625],
+          [72.8250, 19.0550]
+        ]
+      ]
+    },
+    "polygon": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [72.8250, 19.0550],
+          [72.8335, 19.0550],
+          [72.8335, 19.0625],
+          [72.8250, 19.0625],
+          [72.8250, 19.0550]
+        ]
+      ]
+    },
+    "landCover": "vegetation",
+    "lst_celsius": 32.8,
+    "surfaceTempC": 32.8,
+    "ndvi": 0.39,
+    "ndbi": 0.34,
+    "population_density": 24200,
+    "populationDensity": 24200,
+    "population_density_per_sqkm": 24200,
+    "elderly_percentage": 18.4,
+    "elderlyPct": 18.4,
+    "informal_housing_ratio": 0.12,
+    "canopy_cover_pct": 32.5,
+    "drinking_water_access_score": 9.1,
+    "chrs_risk_score": 31.0,
+    "risk_level": "Low",
+    "primary_hazard_driver": "Marine sea breeze buffering and dense mature tree canopy"
+  },
+  {
+    "zone_id": "GRID_MUM_005",
+    "cellId": "GRID_MUM_005",
+    "name": "Govandi - Mankhurd / Shivaji Nagar Slum Cluster",
+    "ward": "M/East",
+    "location": { "type": "Point", "coordinates": [72.9290, 19.0485] },
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [72.9250, 19.0450],
+          [72.9335, 19.0450],
+          [72.9335, 19.0525],
+          [72.9250, 19.0525],
+          [72.9250, 19.0450]
+        ]
+      ]
+    },
+    "polygon": {
+      "type": "Polygon",
+      "coordinates": [
+        [
+          [72.9250, 19.0450],
+          [72.9335, 19.0450],
+          [72.9335, 19.0525],
+          [72.9250, 19.0525],
+          [72.9250, 19.0450]
+        ]
+      ]
+    },
+    "landCover": "slum_informal",
+    "lst_celsius": 45.4,
+    "surfaceTempC": 45.4,
+    "ndvi": 0.04,
+    "ndbi": 0.83,
+    "population_density": 73500,
+    "populationDensity": 73500,
+    "population_density_per_sqkm": 73500,
+    "elderly_percentage": 13.8,
+    "elderlyPct": 13.8,
+    "informal_housing_ratio": 0.89,
+    "canopy_cover_pct": 2.1,
+    "drinking_water_access_score": 2.7,
+    "chrs_risk_score": 93.6,
+    "risk_level": "Critical",
+    "primary_hazard_driver": "Extreme low-albedo informal tin housing, zero canopy, near Deonar perimeter"
+  }
+]

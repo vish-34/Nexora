@@ -1,0 +1,20 @@
+search-path = [
+  "c:/Users/LENOVO Z510/Downloads/Nexora/Nexora/phase-3",
+  "c:/Users/LENOVO Z510/Downloads/Nexora/Nexora/phase-3/app",
+  "c:/Users/LENOVO Z510/Downloads/Nexora/Nexora/phase-3/.venv/Lib/site-packages",
+  "phase-3",
+  "phase-3/app",
+  "phase-3/.venv/Lib/site-packages"
+]
+replace-imports-with-any = [
+  "fastapi",
+  "fastapi.testclient",
+  "fastapi.middleware.cors",
+  "pytest",
+  "networkx",
+  "numpy",
+  "pydantic",
+  "pydantic_settings",
+  "uvicorn",
+  "httpx"
+]

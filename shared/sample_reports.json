@@ -1,0 +1,26 @@
+[
+  {
+    "reporter_name": "Ramesh Patil",
+    "phone": "+91 98201 XXXXX",
+    "category": "Hydration Crisis",
+    "description": "Drinking water tap broken near transit camp",
+    "location": { "lat": 19.0430, "lng": 72.8550 },
+    "symptoms": ["dizziness", "no_water_access"]
+  },
+  {
+    "reporter_name": "R. Sharma",
+    "phone": "+91 98200 XXXXX",
+    "category": "Heat Exhaustion",
+    "description": "Construction worker fainted at the site, seems unconscious, need immediate help.",
+    "location": { "lat": 19.0525, "lng": 72.9095 },
+    "symptoms": ["unconscious", "outdoor_labor"]
+  },
+  {
+    "reporter_name": "Anonymous",
+    "phone": "+91 98192 XXXXX",
+    "category": "Shelter Needed",
+    "description": "Very hot in chawl transit cluster, elderly and small children showing signs of severe heat rash and dizziness.",
+    "location": { "lat": 19.0705, "lng": 72.8826 },
+    "symptoms": ["infant", "elderly", "heat_rash"]
+  }
+]

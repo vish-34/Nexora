@@ -1,0 +1,21 @@
+[
+  {
+    "reporterName": "Anonymous",
+    "location": { "type": "Point", "coordinates": [72.8826, 19.0705] },
+    "description": "My elderly neighbor is feeling dizzy and confused, no water at home and fan not working.",
+    "symptoms": ["dizziness", "elderly", "no_water_access"]
+  },
+  {
+    "reporterName": "R. Sharma",
+    "contactPhone": "+91-98200-00001",
+    "location": { "type": "Point", "coordinates": [72.9095, 19.0525] },
+    "description": "Construction worker fainted at the site, seems unconscious, need immediate help.",
+    "symptoms": ["unconscious", "outdoor_labor"]
+  },
+  {
+    "reporterName": "Anonymous",
+    "location": { "type": "Point", "coordinates": [72.8480, 19.1850] },
+    "description": "It's very hot in our chawl, small children showing signs of heat rash and irritability.",
+    "symptoms": ["infant", "heat_rash"]
+  }
+]

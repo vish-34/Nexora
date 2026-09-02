@@ -1,0 +1,14 @@
+[tool.pyrefly]
+search-path = [
+  "Nexora/phase-3",
+  "Nexora/phase-3/app",
+  "Nexora/phase-3/.venv/Lib/site-packages"
+]
+
+[tool.pyright]
+venvPath = "Nexora/phase-3"
+venv = ".venv"
+extraPaths = [
+  "Nexora/phase-3",
+  "Nexora/phase-3/app"
+]

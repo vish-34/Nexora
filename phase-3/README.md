@@ -8,11 +8,9 @@ Please refer to [PHASE_3.md](file:///c:/Users/vishal/Desktop/Nexora/PHASE_3.md) 
 1. Initialize Phase 3:
    ```bash
    cd phase-3
-   python -m venv venv
-   # On Windows:
-   .\venv\Scripts\activate
-   # Install dependencies:
-   pip install fastapi uvicorn networkx numpy pydantic
+   uv venv
+   .\.venv\Scripts\activate
+   uv pip install -r requirements.txt
    ```
 2. Configure `.env`:
    ```env

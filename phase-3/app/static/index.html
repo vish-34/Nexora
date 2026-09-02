@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CoolNeighbour AI (ThermoShield) | Tactical Test HUD</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="theme-dark">
+  <div class="app-layout">
+    <header class="app-header">
+      <div class="header-left">
+        <div class="brand-logo">
+          <div class="radar-pulse"></div>
+          <div class="brand-text">
+            <span class="brand-title">COOLNEIGHBOUR<span class="accent-text">AI</span></span>
+            <span class="brand-sub">THERMOSHIELD HUD &bull; PHASE 3 TESTBED</span>
+          </div>
+        </div>
+        <div class="persona-switch">
+          <button id="btn-persona-admin" class="persona-btn active" data-persona="admin">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            City Command HUD
+          </button>
+          <button id="btn-persona-citizen" class="persona-btn" data-persona="citizen">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            Citizen Relief Portal
+          </button>
+        </div>
+      </div>
+
+      <div class="header-center">
+        <div class="wbgt-banner">
+          <span class="pulse-dot"></span>
+          <span class="wbgt-label">MUMBAI WBGT:</span>
+          <span class="wbgt-val" id="telemetry-wbgt">33.8°C</span>
+          <span class="badge badge-alert">RED ALERT: EXTREME DANGER</span>
+          <span class="wbgt-sub">(Air: 37.4°C | RH: 74%)</span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <button id="btn-open-explainer" class="grok-launcher-btn">
+          <span class="sparkle-icon">&#10024;</span>
+          <span>Grok RAG Explainer</span>
+        </button>
+        <div class="gateway-picker">
+          <span class="label">API Gateway:</span>
+          <select id="api-base-select" class="hud-select">
+            <option value="http://localhost:8000" selected>Direct AI Engine (:8000)</option>
+            <option value="http://localhost:5000">Phase 2 Gateway (:5000)</option>
+          </select>
+        </div>
+        <div class="conn-status" id="conn-status-pill">
+          <span class="status-indicator"></span>
+          <span class="status-text" id="conn-status-text">AI Engine Online</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="main-container">
+      <section class="map-section">
+        <div class="map-controls-dock">
+          <div class="dock-group">
+            <span class="dock-label">GIS Active Layer</span>
+            <div class="layer-buttons">
+              <button class="layer-btn active" data-layer="chrs">Heat Risk (CHRS)</button>
+              <button class="layer-btn" data-layer="lst">Surface Temp (°C)</button>
+              <button class="layer-btn" data-layer="ndvi">Canopy (NDVI)</button>
+              <button class="layer-btn" data-layer="shelters">Cooling Shelters</button>
+              <button class="layer-btn" data-layer="sos">SOS Beacons</button>
+            </div>
+          </div>
+          <div class="dock-group">
+            <span class="dock-label">Testbed Focus</span>
+            <select id="map-zone-quickjump" class="hud-select hud-select-sm">
+              <option value="GRID_MUM_001">Dharavi Sector 3 (Critical: 89.4)</option>
+              <option value="GRID_MUM_002">Kurla West Hub (Critical: 82.7)</option>
+              <option value="GRID_MUM_003">BKC G-Block (Moderate: 52.3)</option>
+              <option value="GRID_MUM_004">Bandra West Coast (Low: 31.0)</option>
+              <option value="GRID_MUM_005">Govandi Slum (Critical: 93.6)</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="map-view" class="leaflet-canvas"></div>
+
+        <div class="map-overlay-legend">
+          <div class="legend-title">Composite Heat Risk Index (CHRS)</div>
+          <div class="legend-bar">
+            <span class="bar-step c-low">0-35 Low</span>
+            <span class="bar-step c-mod">36-65 Mod</span>
+            <span class="bar-step c-high">66-80 High</span>
+            <span class="bar-step c-crit">81-100 Critical</span>
+          </div>
+        </div>
+
+        <div class="map-floating-stats">
+          <div class="f-stat">
+            <span class="f-label">Monitored Zones</span>
+            <span class="f-val">5 Micro-Grids (2.5 km²)</span>
+          </div>
+          <div class="f-stat">
+            <span class="f-label">Critical Hotspots</span>
+            <span class="f-val text-crit">3 Zones (72.8% Area)</span>
+          </div>
+          <div class="f-stat">
+            <span class="f-label">Cooling Hubs</span>
+            <span class="f-val text-cyan">4 Verified Shelters</span>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel-section" id="sidebar-panel">
+        <div class="panel-nav">
+          <button class="tab-btn active" data-tab="xai">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><circle cx="12" cy="12" r="3"/></svg>
+            XAI Diagnostics
+          </button>
+          <button class="tab-btn" data-tab="simulate">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            What-If Simulator
+          </button>
+          <button class="tab-btn" data-tab="coolpath">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+            CoolPath Routing
+          </button>
+          <button class="tab-btn" data-tab="triage">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            NLP Triage & SOS
+          </button>
+        </div>
+
+        <div class="panel-body">
+          <div class="tab-content active" id="tab-xai">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title">Explainable AI (XAI) Hotspot Factor Audit</h2>
+                <p class="card-desc">SHAP-like feature attribution breaking down the exact root drivers of extreme heat risk.</p>
+              </div>
+              <span class="badge badge-subtle">GET /api/ai/explain/:zone_id</span>
+            </div>
+
+            <div class="zone-selector-row">
+              <label class="hud-label">Select Micro-Grid Zone:</label>
+              <select id="xai-zone-select" class="hud-select">
+                <option value="GRID_MUM_001" selected>GRID_MUM_001 &bull; Dharavi Sector 3 / Transit Camp</option>
+                <option value="GRID_MUM_002">GRID_MUM_002 &bull; Kurla West Station Hub</option>
+                <option value="GRID_MUM_003">GRID_MUM_003 &bull; Bandra Kurla Complex (BKC) G-Block</option>
+                <option value="GRID_MUM_004">GRID_MUM_004 &bull; Bandra West / Carter Road Fringe</option>
+                <option value="GRID_MUM_005">GRID_MUM_005 &bull; Govandi - Mankhurd Slum Cluster</option>
+              </select>
+            </div>
+
+            <div class="xai-score-hero" id="xai-score-hero">
+              <div class="score-ring-wrap">
+                <div class="score-ring">
+                  <span class="score-value" id="xai-hero-score">89.4</span>
+                  <span class="score-label">CHRS INDEX</span>
+                </div>
+              </div>
+              <div class="score-meta">
+                <div class="meta-tier">
+                  <span class="tier-label">Risk Category:</span>
+                  <span class="badge badge-crit" id="xai-hero-category">Critical Hotspot</span>
+                </div>
+                <div class="meta-stat">
+                  <span>Target Zone:</span>
+                  <strong id="xai-hero-name">Dharavi Sector 3 / Transit Camp</strong>
+                </div>
+                <div class="meta-stat">
+                  <span>Vulnerability Drivers:</span>
+                  <span id="xai-hero-drivers">Low albedo tin roofing, near zero tree canopy</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="xai-factors-card">
+              <div class="factors-head">
+                <span>Top Risk Driver Attribution</span>
+                <span>Relative Impact (%)</span>
+              </div>
+              <div id="xai-drivers-list" class="drivers-list"></div>
+            </div>
+
+            <div class="sdg-card">
+              <div class="sdg-title">UN Sustainable Development Goals (SDG) Alignment</div>
+              <div class="sdg-tags" id="xai-sdg-tags">
+                <span class="tag-chip">SDG 11 &bull; Sustainable Cities & Communities</span>
+                <span class="tag-chip">SDG 13 &bull; Climate Action</span>
+              </div>
+            </div>
+
+            <div class="action-btn-row">
+              <button id="btn-xai-to-sim" class="btn-primary flex-1">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                Simulate Interventions
+              </button>
+              <button id="btn-xai-explain-screen" class="btn-secondary">
+                <span class="sparkle-icon">&#10024;</span>
+                Explain Screen
+              </button>
+            </div>
+          </div>
+
+          <div class="tab-content" id="tab-simulate">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title">Urban Policy "What-If" Intervention Sandbox</h2>
+                <p class="card-desc">Simulate adding canopy trees, cool roofs, and hydration kiosks with instant LST drop & budget calculations.</p>
+              </div>
+              <span class="badge badge-subtle">POST /api/ai/simulate</span>
+            </div>
+
+            <div class="zone-selector-row">
+              <label class="hud-label">Simulation Target Zone:</label>
+              <select id="sim-zone-select" class="hud-select">
+                <option value="GRID_MUM_001" selected>GRID_MUM_001 &bull; Dharavi Sector 3 (CHRS: 89.4)</option>
+                <option value="GRID_MUM_002">GRID_MUM_002 &bull; Kurla West Station Hub (CHRS: 82.7)</option>
+                <option value="GRID_MUM_003">GRID_MUM_003 &bull; BKC G-Block (CHRS: 52.3)</option>
+                <option value="GRID_MUM_004">GRID_MUM_004 &bull; Bandra West (CHRS: 31.0)</option>
+                <option value="GRID_MUM_005">GRID_MUM_005 &bull; Govandi - Mankhurd (CHRS: 93.6)</option>
+              </select>
+            </div>
+
+            <div class="sliders-container">
+              <div class="slider-box">
+                <div class="slider-label-row">
+                  <span class="s-name">
+                    <svg class="s-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    Add Mature Canopy Trees (Neem / Banyan)
+                  </span>
+                  <span class="s-value"><strong id="val-trees">250</strong> trees</span>
+                </div>
+                <input type="range" id="slider-trees" min="0" max="1000" step="25" value="250" class="hud-range">
+                <div class="slider-sub">Cost: ₹3,500/tree (includes 2-yr municipal maintenance)</div>
+              </div>
+
+              <div class="slider-box">
+                <div class="slider-label-row">
+                  <span class="s-name">
+                    <svg class="s-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>
+                    Apply High-Albedo Cool Roof Coating
+                  </span>
+                  <span class="s-value"><strong id="val-roofs">8,000</strong> m²</span>
+                </div>
+                <input type="range" id="slider-roofs" min="0" max="25000" step="500" value="8000" class="hud-range">
+                <div class="slider-sub">Cost: ₹120/m² elastomeric reflective coating</div>
+              </div>
+
+              <div class="slider-box">
+                <div class="slider-label-row">
+                  <span class="s-name">
+                    <svg class="s-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+                    Deploy Solar Misting Hydration Kiosks
+                  </span>
+                  <span class="s-value"><strong id="val-kiosks">3</strong> units</span>
+                </div>
+                <input type="range" id="slider-kiosks" min="0" max="10000" step="1" value="3" class="hud-range">
+                <div class="slider-sub">Cost: ₹3,00,000/kiosk (filtration + high pressure misting)</div>
+              </div>
+            </div>
+
+            <div class="telemetry-grid">
+              <div class="tele-card highlight-card">
+                <span class="t-label">Predicted LST Drop</span>
+                <div class="t-hero text-cyan">
+                  <span class="t-arrow">&darr;</span>
+                  <span id="res-lst-drop">-2.4</span>°C
+                </div>
+                <span class="t-sub">Localized ground cooling</span>
+              </div>
+
+              <div class="tele-card">
+                <span class="t-label">CHRS Risk Reduction</span>
+                <div class="t-hero">
+                  <span id="res-orig-chrs" class="text-crit">89.4</span>
+                  <span class="t-arrow">&rarr;</span>
+                  <span id="res-sim-chrs" class="text-green">64.2</span>
+                </div>
+                <span class="t-sub">Transitions to Moderate</span>
+              </div>
+
+              <div class="tele-card">
+                <span class="t-label">Estimated Municipal Budget</span>
+                <div class="t-hero text-amber" id="res-budget">₹27,35,000</div>
+                <span class="t-sub">Procurement + civil works</span>
+              </div>
+
+              <div class="tele-card">
+                <span class="t-label">Annual CO₂ Offset</span>
+                <div class="t-hero text-green" id="res-co2">12.5 tons/yr</div>
+                <span class="t-sub">50 kg CO₂ per tree/year</span>
+              </div>
+            </div>
+
+            <div class="sim-footer-row">
+              <div class="roi-badge-wrap">
+                <span class="roi-label">Policy ROI Rating:</span>
+                <span class="badge badge-crit" id="res-roi">High Priority</span>
+              </div>
+              <div class="beneficiaries-wrap">
+                <span>Benefited Citizens:</span>
+                <strong id="res-pop">17,000</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="tab-coolpath">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title">CoolPath Microclimate Thermal Comfort Routing</h2>
+                <p class="card-desc">Thermal comfort graph pathfinding prioritizing shaded pedestrian canopies and hydration over scorching asphalt.</p>
+              </div>
+              <span class="badge badge-subtle">POST /api/ai/coolpath</span>
+            </div>
+
+            <div class="route-inputs-card">
+              <div class="route-field">
+                <label class="hud-label">Origin Waypoint:</label>
+                <select id="cp-origin-select" class="hud-select">
+                  <option value="19.0405,72.8525" selected>Dharavi Transit Camp Gate 3 (19.0405, 72.8525)</option>
+                  <option value="19.0650,72.8700">Kurla West Depot Entry (19.0650, 72.8700)</option>
+                  <option value="19.0600,72.8600">BKC Avenue Commercial Hub (19.0600, 72.8600)</option>
+                  <option value="19.0550,72.8250">Bandra West Carter Promenade (19.0550, 72.8250)</option>
+                </select>
+              </div>
+
+              <div class="route-field">
+                <label class="hud-label">Destination Waypoint:</label>
+                <select id="cp-dest-select" class="hud-select">
+                  <option value="19.0485,72.8585" selected>Dharavi Health Post & AC Hall (19.0485, 72.8585)</option>
+                  <option value="19.0665,72.8722">Kurla Misting Zone (19.0665, 72.8722)</option>
+                  <option value="19.0630,72.8640">BKC Shaded Amphitheatre (19.0630, 72.8640)</option>
+                  <option value="19.0490,72.9295">Govandi Maternity Shelter (19.0490, 72.9295)</option>
+                </select>
+              </div>
+
+              <button id="btn-run-coolpath" class="btn-primary w-full">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+                Calculate CoolPath Route Comparison
+              </button>
+            </div>
+
+            <div class="route-comparison-grid">
+              <div class="route-card route-card-shortest">
+                <div class="rc-header">
+                  <span class="rc-badge text-crit">&bull; Route A (Standard GPS)</span>
+                  <span class="rc-title">Shortest Distance</span>
+                </div>
+                <div class="rc-stats">
+                  <div class="rc-stat">
+                    <span>Distance:</span>
+                    <strong id="r-short-dist">1,090 m</strong>
+                  </div>
+                  <div class="rc-stat">
+                    <span>Walking Time:</span>
+                    <strong id="r-short-time">14 mins</strong>
+                  </div>
+                  <div class="rc-stat">
+                    <span>Avg Surface Temp:</span>
+                    <strong id="r-short-temp" class="text-crit">43.5°C</strong>
+                  </div>
+                  <div class="rc-stat">
+                    <span>Tree Shade Cover:</span>
+                    <strong id="r-short-shade">8.0%</strong>
+                  </div>
+                  <div class="rc-stat">
+                    <span>Thermal Strain:</span>
+                    <span class="badge badge-crit" id="r-short-strain">High Danger (91/100)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="route-card route-card-coolest">
+                <div class="rc-header">
+                  <span class="rc-badge text-cyan">&bull; Route B (CoolPath AI)</span>
+                  <span class="rc-title">Thermal Comfort</span>
+                </div>
+                <div class="rc-stats">
+                  <div class="rc-stat">
+                    <span>Distance:</span>
+                    <strong id="r-cool-dist">1,488 m</strong>
+                  </div>
+                  <div class="rc-stat">
+                    <span>Walking Time:</span>
+                    <strong id="r-cool-time">19 mins (+5m)</strong>
+                  </div>
+                  <div class="rc-stat">
+                    <span>Avg Surface Temp:</span>
+                    <strong id="r-cool-temp" class="text-cyan">38.4°C</strong>
+                  </div>
+                  <div class="rc-stat">
+                    <span>Tree Shade Cover:</span>
+                    <strong id="r-cool-shade" class="text-green">78.0%</strong>
+                  </div>
+                  <div class="rc-stat">
+                    <span>Thermal Relief Delta:</span>
+                    <strong id="r-cool-delta" class="text-green">-4.5°C Lower Temp</strong>
+                  </div>
+                  <div class="rc-stat">
+                    <span>Water Kiosks En Route:</span>
+                    <strong id="r-cool-water">2 Hydration Stops</strong>
+                  </div>
+                  <div class="rc-stat">
+                    <span>Thermal Strain:</span>
+                    <span class="badge badge-green" id="r-cool-strain">Safe / Tolerable (38/100)</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-content" id="tab-triage">
+            <div class="card-header">
+              <div>
+                <h2 class="card-title">NLP Community Distress Triage & Rapid Dispatch</h2>
+                <p class="card-desc">Citizen heat distress intelligence: extracts symptom entities, assigns urgency tiers, and issues operational recommendations.</p>
+              </div>
+              <span class="badge badge-subtle">POST /api/ai/triage</span>
+            </div>
+
+            <div class="preset-reports-row">
+              <span class="preset-label">Test Case Presets:</span>
+              <button class="preset-btn" data-preset="emergency">Hydration Crisis</button>
+              <button class="preset-btn" data-preset="critical">Elderly Heat Stroke</button>
+              <button class="preset-btn" data-preset="infrastructure">Broken Kiosk</button>
+            </div>
+
+            <div class="triage-form">
+              <div class="form-group">
+                <label class="hud-label">Distress Description / Transcribed Audio:</label>
+                <textarea id="triage-desc" class="hud-textarea" rows="4">Drinking water tap broken near transit camp crossroad, construction workers having severe dizziness and thirst.</textarea>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="hud-label">Reporter Name:</label>
+                  <input type="text" id="triage-name" class="hud-input" value="Ramesh Patil">
+                </div>
+                <div class="form-group">
+                  <label class="hud-label">Category:</label>
+                  <select id="triage-category" class="hud-select">
+                    <option value="Hydration Crisis" selected>Hydration Crisis</option>
+                    <option value="Heat Exhaustion">Heat Exhaustion</option>
+                    <option value="Broken Infrastructure">Broken Infrastructure</option>
+                    <option value="Shelter Needed">Shelter Needed</option>
+                  </select>
+                </div>
+              </div>
+
+              <button id="btn-submit-triage" class="btn-primary w-full">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                Execute NLP Urgency Triage
+              </button>
+            </div>
+
+            <div class="triage-result-card" id="triage-result-card">
+              <div class="tr-header">
+                <span class="tr-label">AI Triage Assessment</span>
+                <span class="badge badge-alert" id="tr-urgency-badge">EMERGENCY</span>
+              </div>
+              <div class="tr-metrics">
+                <div class="tr-metric">
+                  <span>Confidence Level:</span>
+                  <strong id="tr-confidence">95.0%</strong>
+                </div>
+                <div class="tr-metric">
+                  <span>Extracted Entities:</span>
+                  <div class="entity-chips" id="tr-entities">
+                    <span class="entity-chip">no drinking water</span>
+                    <span class="entity-chip">dizziness</span>
+                    <span class="entity-chip">outdoor workers</span>
+                  </div>
+                </div>
+              </div>
+              <div class="tr-action-box">
+                <span class="action-label">Municipal Dispatch Recommendation:</span>
+                <div class="action-text" id="tr-action">Dispatch emergency municipal water tanker & ORS distribution kit</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <div class="grok-explainer-drawer" id="grok-drawer">
+        <div class="drawer-header">
+          <div class="dh-title">
+            <span class="sparkle-icon">&#10024;</span>
+            <h3>Grok Screen Explainer (RAG)</h3>
+            <span class="model-badge" id="grok-model-badge">grok-2-latest</span>
+          </div>
+          <button id="btn-close-grok" class="drawer-close">&times;</button>
+        </div>
+
+        <div class="drawer-body">
+          <div class="voice-controls-bar">
+            <div class="voice-buttons">
+              <button id="btn-grok-explain" class="grok-action-btn">
+                <span class="sparkle-icon">&#10024;</span>
+                Analyze Active Screen
+              </button>
+              <button id="btn-grok-tts" class="grok-action-btn tts-btn">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                <span id="tts-btn-text">Listen Briefing</span>
+              </button>
+              <button id="btn-grok-mic" class="grok-action-btn mic-btn" title="Wispr Flow Voice Dictation">
+                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                <span id="mic-status-text">Dictate</span>
+              </button>
+            </div>
+            <div class="audio-wave hidden" id="tts-wave">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+
+          <div class="custom-query-box">
+            <input type="text" id="grok-query-input" class="hud-input" placeholder="Ask Grok anything about this screen (or use voice)...">
+            <button id="btn-grok-send" class="btn-primary btn-sm">Ask</button>
+          </div>
+
+          <div class="grok-output-area" id="grok-output">
+            <div class="grok-placeholder">
+              <span class="sparkle-icon">&#10024;</span>
+              <p>Click <strong>Analyze Active Screen</strong> or ask a question to generate a grounded RAG explanation of whatever you are currently viewing.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section class="citizen-view-section hidden" id="citizen-portal-view">
+        <div class="citizen-container">
+          <div class="citizen-hero">
+            <h1 class="c-title">Beat The Heat &bull; Mumbai Relief</h1>
+            <p class="c-desc">Emergency hydration points, shaded pedestrian navigation, and air-conditioned cooling shelters near you.</p>
+          </div>
+
+          <div class="citizen-quick-actions">
+            <button class="c-action-card card-sos" id="btn-citizen-sos">
+              <div class="c-icon-circle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4M12 16h.01"/></svg>
+              </div>
+              <div class="c-action-info">
+                <h3>Emergency Heat SOS</h3>
+                <p>Report dehydration, heat stroke, or request drinking water tanker</p>
+              </div>
+            </button>
+
+            <button class="c-action-card card-route" id="btn-citizen-coolpath">
+              <div class="c-icon-circle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+              </div>
+              <div class="c-action-info">
+                <h3>Shaded CoolPath</h3>
+                <p>Walk under tree canopies with up to -4.5°C lower heat exposure</p>
+              </div>
+            </button>
+          </div>
+
+          <div class="citizen-shelters-section">
+            <div class="cs-head">
+              <h2>Nearby Cooling Shelters & Water Kiosks</h2>
+              <span class="cs-filter">Within 2.5 km</span>
+            </div>
+            <div class="shelters-grid" id="citizen-shelters-list"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

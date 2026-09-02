@@ -1,10 +1,7 @@
-# Dependencies
 node_modules/
 */node_modules/
 .pnp
 .pnp.js
-
-# Python & Virtual Environments
 __pycache__/
 *.py[cod]
 *$py.class
@@ -27,20 +24,12 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-.venv
+.venv/
 venv/
 ENV/
 env/
-
-# Production & Build outputs
-dist/
-*/dist/
-build/
-*/build/
 out/
 .next/
-
-# Environment Variables & Secrets
 .env
 .env.local
 .env.development.local
@@ -49,17 +38,13 @@ out/
 *.env
 *.env.*
 !.env.example
-
-# Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
-# Testing & Coverage
 coverage/
 */coverage/
 .nyc_output/
@@ -67,8 +52,6 @@ coverage/
 .coverage.*
 htmlcov/
 .pytest_cache/
-
-# IDE & Editor files
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
@@ -77,8 +60,6 @@ htmlcov/
 *.sublime-project
 *.swp
 *.swo
-
-# Operating System Files
 .DS_Store
 .DS_Store?
 ._*
@@ -87,8 +68,7 @@ htmlcov/
 ehthumbs.db
 Thumbs.db
 [Dd]esktop.ini
-
-# Temporary files & Caches
+desktop.ini
 tmp/
 temp/
 .temp/

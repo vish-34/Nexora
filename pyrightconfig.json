@@ -1,0 +1,8 @@
+{
+  "venvPath": "Nexora/phase-3",
+  "venv": ".venv",
+  "extraPaths": [
+    "Nexora/phase-3",
+    "Nexora/phase-3/app"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/Nexora/phase-3/.venv/Scripts/python.exe",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/Nexora/phase-3",
+    "${workspaceFolder}/Nexora/phase-3/app",
+    "${workspaceFolder}/Nexora/phase-3/.venv/Lib/site-packages"
+  ],
+  "python.autoComplete.extraPaths": [
+    "${workspaceFolder}/Nexora/phase-3",
+    "${workspaceFolder}/Nexora/phase-3/app",
+    "${workspaceFolder}/Nexora/phase-3/.venv/Lib/site-packages"
+  ]
+}

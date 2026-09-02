@@ -1,159 +1,213 @@
-# Implementation Plan: Three.js Hierarchical Geographic Focus Map
-
-This plan details replacing the standard 2D Leaflet map in **Phase 1** with a custom, high-performance **Three.js 3D Hierarchical Geographic Focus System**.
-
-The system implements the exact visual and interaction paradigm:
-> 🌍 **World View** (All countries visible, muted dark-moss aesthetic)  
-> 　　↓ *Zooming / clicking toward India*  
-> 🇮🇳 **India Isolated** (Surrounding world countries smoothly fade out to opacity 0, India centered & stabilized)  
-> 　　↓ *Zooming / clicking toward Maharashtra*  
-> 🏛️ **Maharashtra Isolated** (Other Indian states fade out, Maharashtra centered)  
-> 　　↓ *Zooming / clicking toward Mumbai*  
-> 🏙️ **Mumbai Micro-Grid Hotspots** (500m micro-grids render in the exact tonal choropleth palette: deep moss to luminous lime, interactive cell diagnostics)  
-> 　　🔙 *Zooming back out* smoothly reverses every step!
+# Unified Implementation Plan: CoolNeighbour AI (Urban Heat Risk & Climate Resilience Platform)
+> **Problem Statement**: PR•RESQ: AI & Geospatial Urban Heat Risk Management Platform
+> **Testbed City**: Mumbai Metropolitan Area (Dharavi, Kurla, Mankhurd, BKC, Bandra)
+> **Core Architecture**: MERN Stack + Python/FastAPI Spatial AI Microservice
+> **Team Division**: 3 Independent Builders / Phases (Phase 1 Frontend, Phase 2 Core Backend & DB, Phase 3 AI & CoolPath Engine)
 
 ---
 
-## User Review Required
+## 1. Executive Summary & Hackathon Winning Strategy
 
-> [!IMPORTANT]
-> **Dependencies to Add in Phase 1**:
-> We will add `three`, `gsap`, and `d3-geo` to `phase-1`:
-> - `three`: High-performance WebGL rendering engine.
-> - `gsap`: Production-grade tweening library for buttery-smooth camera movements and material opacity transitions.
-> - `d3-geo`: Ultra-fast projection math converting GeoJSON coordinates (longitude, latitude) into planar Three.js `ShapeGeometry`.
+Extreme urban heat is a silent killer in dense, developing urban environments. While generic weather apps report uniform ambient temperatures (e.g. 36°C), localized ground surface temperatures in dense informal settlements frequently surge to **44°C–48°C** due to tin-sheet roofing, high building density, absence of tree canopy, and lack of hydration points.
 
-> [!NOTE]
-> **GeoJSON Data Strategy**:
-> To keep initial load under 300ms without lag:
-> 1. We will use a lightweight, simplified **World GeoJSON** (~180 KB) for country boundaries.
-> 2. An **India States GeoJSON** (~120 KB) for national state boundaries.
-> 3. Our existing **Mumbai 500m Heat Grid GeoJSON** with realistic LST, NDVI, and CHRS heat risk data.
-> All GeoJSON files will reside locally in `phase-1/src/data/` for zero-network-latency offline instant rendering.
+To build an undisputed **1st place winning solution**, **CoolNeighbour AI (ThermoShield)** is structured as an end-to-end climate resilience platform combining:
+1. **Multi-source Geospatial Heat Risk Engine**: Fusion of Satellite Land Surface Temperature (LST), Normalized Difference Vegetation Index (NDVI), Built-up Index (NDBI), real-time Wet Bulb Globe Temperature (WBGT), and Socio-Economic Vulnerability Index (SEVI).
+2. **Explainable AI (XAI) Hotspot Diagnostics**: SHAP-like factor contribution explaining *why* a micro-grid cell is hazardous (+36% surface heat, +28% informal tin roofs, +22% canopy deficit).
+3. **Interactive "What-If" Policy Simulator**: Municipal sandbox enabling urban planners to simulate policy interventions (*add 250 canopy trees, 8,000 m² cool roofs, 3 misting kiosks*) and view the immediate predicted temperature drop and risk score reduction in real time.
+4. **"CoolPath" Microclimate Route Optimizer**: The killer citizen feature — side-by-side comparison of the **Shortest Route (High Heat Exposure)** vs **Coolest Route (Shaded Canopy & Water Waypoints)** with shade percentage and metabolic strain metrics.
+5. **Crowdsourced Ground-Truth & NLP Auto-Triage**: Citizens submit geo-tagged heat distress reports (*"no drinking water", "elderly heat stroke risk"*), classified by AI into urgency levels that dynamically update hotspot priority.
+6. **Dual Persona Interface**:
+   - **City Heat Command Center (Admin/Planner)**: Tactical HUD for municipal corporations and disaster authorities.
+   - **Citizen Heat Relief Portal (Public Mobile-Optimized)**: Instant "Find nearest cooling center with cool route", hydration alerts, and heat-safe navigation.
 
 ---
 
-## System Architecture: Three.js Focus Engine
+## 2. 3-Phase Unified Team Partitioning
+
+To ensure that **3 developers can build concurrently without blocking each other or causing merge conflicts**, the platform is strictly divided into 3 modular phases with a shared contract layer:
 
 ```
-                                  THREE.JS SCENE GRAPH
+                                    COOLNEIGHBOUR AI
                                            │
   ┌────────────────────────────────────────┼────────────────────────────────────────┐
   │                                        │                                        │
 ┌─▼──────────────────────────┐  ┌──────────▼───────────────────┐  ┌─────────────────▼─────────────────┐
-│       LEVEL 1: WORLD       │  │      LEVEL 2: INDIA          │  │  LEVEL 3: MAHARASHTRA / MUMBAI    │
-├────────────────────────────┤  ├──────────────────────────────┤  ├───────────────────────────────────┤
-│ • World Countries Meshes   │  │ • Indian States Meshes       │  │ • Maharashtra Boundary Mesh       │
-│ • Deep moss base color     │  │ • Maharashtra highlighted    │  │ • Mumbai 500m Heat Grid Polygons  │
-│ • Muted opacity (0.4-0.8)  │  │ • Other states fade out      │  │ • Exact Tonal Scale: Moss -> Lime │
-│ • Fades to 0 when near IND │  │ • Fades to 0 when entering MH│  │ • Interactive Hotspot Raycasting  │
-└────────────────────────────┘  └──────────────────────────────┘  └───────────────────────────────────┘
-                                           ▲
-                                           │
-                             ┌─────────────┴─────────────┐
-                             │    MapFocusManager &      │
-                             │ Camera Stabilization GSAP │
-                             └───────────────────────────┘
+│ PHASE 1: FRONTEND HUD      │  │ PHASE 2: CORE MERN BACKEND   │  │ PHASE 3: AI & COOLPATH ENGINE     │
+│ (Developer 1)              │  │ (Developer 2)                │  │ (Developer 3)                     │
+│ Location: /phase-1         │  │ Location: /phase-2           │  │ Location: /phase-3                │
+│ Port: 5173                 │  │ Port: 5000                   │  │ Port: 8000                        │
+│ Tech: React 18 + Vite + TS │  │ Tech: Node + Express + Mongo │  │ Tech: Python FastAPI + NetworkX   │
+│ Leaflet + Recharts         │  │ Mongoose + Turf + Open-Meteo │  │ CHRS + XAI + What-If + NLP Triage │
+│ Plan: PHASE_1.md           │  │ Plan: PHASE_2.md             │  │ Plan: PHASE_3.md                  │
+└──────────────┬─────────────┘  └──────────────┬───────────────┘  └─────────────────┬─────────────────┘
+               │                               │                                    │
+               └──────────────────────► SHARED CONTRACTS ◄──────────────────────────┘
+                         (shared/api-contract.json, mumbai_heat_grid.json)
+```
+
+### Phase Summary Matrix
+
+| Phase | Developer Role | Scope & Deliverables | Tech Stack | Dedicated Plan File |
+| :--- | :--- | :--- | :--- | :--- |
+| **Phase 1** | **Developer 1**<br>*(Frontend Lead)* | Command Center HUD, Citizen Mobile View, Leaflet GIS map with 500m heat polygons, XAI Drawer, What-If Policy Sliders, CoolPath Route Comparison Modal, SOS Report Form, offline mock data layer. | React 18, Vite, TypeScript, Vanilla CSS / Tailwind tokens, Leaflet, Recharts, Lucide Icons, Axios | [PHASE_1.md](file:///c:/Users/vishal/Desktop/Nexora/PHASE_1.md) |
+| **Phase 2** | **Developer 2**<br>*(MERN Backend & DB Lead)* | Express REST API server, MongoDB schemas (HeatGrid, Shelters, Reports, Interventions), 2dsphere spatial queries, Open-Meteo live WBGT weather ingestion, seed data ingestion, reverse proxy to Phase 3. | Node.js, Express.js, MongoDB / Mongoose, Turf.js, Axios, CORS, Dotenv | [PHASE_2.md](file:///c:/Users/vishal/Desktop/Nexora/PHASE_2.md) |
+| **Phase 3** | **Developer 3**<br>*(AI & Spatial Routing Lead)* | Composite Heat Risk Score (CHRS) algorithm, XAI feature attribution diagnostics, What-If urban intervention mathematical model, CoolPath A* microclimate thermal router, NLP distress report triage. | Python 3.10+, FastAPI, Uvicorn, NetworkX, NumPy, Pydantic | [PHASE_3.md](file:///c:/Users/vishal/Desktop/Nexora/PHASE_3.md) |
+
+---
+
+## 3. Unified Directory Structure
+
+```
+Nexora/
+├── PROJECT_CONTEXT.md             # Master platform context for all 3 developers & their AI agents
+├── implementation_plan.md         # This unified master plan
+├── PHASE_1.md                     # Dedicated instruction plan for Developer 1 (Frontend)
+├── PHASE_2.md                     # Dedicated instruction plan for Developer 2 (Backend & DB)
+├── PHASE_3.md                     # Dedicated instruction plan for Developer 3 (AI & Algorithms)
+│
+├── shared/                        # Single source of truth for schemas & seed data
+│   ├── api-contract.json          # Complete REST API specification (endpoints, params, schemas)
+│   ├── mumbai_heat_grid.json      # Realistic 500m micro-grid GeoJSON for Mumbai testbed
+│   ├── cooling_centers.json       # Cooling shelters, misting kiosks, and emergency clinics
+│   └── sample_reports.json        # Seed citizen distress reports with AI triage tags
+│
+├── phase-1/                       # DEVELOPER 1 WORKSPACE (Frontend)
+│   ├── README.md                  # Quick reference pointing to PHASE_1.md
+│   ├── package.json
+│   ├── vite.config.ts
+│   ├── index.html
+│   ├── .env.example
+│   ├── .env                       # Pre-configured with VITE_USE_MOCK=true
+│   └── src/
+│       ├── types/index.ts         # TypeScript definitions strictly matching shared/api-contract.json
+│       ├── services/mockData.ts   # Instant zero-backend mock data layer
+│       ├── services/api.ts        # Resilient Axios client (auto-switchable mock vs live API)
+│       ├── styles/index.css       # Dark tactical glassmorphic styling & heat gradients
+│       ├── components/            # UI components (Navbar, MapView, XaiDrawer, WhatIf, CoolPath, etc.)
+│       └── App.tsx                # Shell with Persona Switcher (Command HUD vs Citizen View)
+│
+├── phase-2/                       # DEVELOPER 2 WORKSPACE (MERN Backend)
+│   ├── README.md                  # Quick reference pointing to PHASE_2.md
+│   ├── package.json
+│   ├── .env.example
+│   ├── .env                       # PORT=5000, MONGO_URI, AI_ENGINE_URL=http://localhost:8000
+│   └── src/
+│       ├── server.js              # Express entrypoint & middleware
+│       ├── config/db.js           # Mongoose MongoDB connection
+│       ├── models/                # HeatGrid, CoolingCenter, CitizenReport, Intervention
+│       ├── services/              # weatherService.js (Open-Meteo WBGT), aiGatewayService.js
+│       ├── controllers/           # gridController, shelterController, reportController, aiProxyController
+│       ├── routes/                # Express router mounts matching shared/api-contract.json
+│       └── utils/seedData.js      # npm run seed (seeds MongoDB from shared/*.json)
+│
+└── phase-3/                       # DEVELOPER 3 WORKSPACE (AI Engine)
+    ├── README.md                  # Quick reference pointing to PHASE_3.md
+    ├── requirements.txt           # fastapi, uvicorn, networkx, numpy, pydantic
+    ├── .env.example
+    ├── .env                       # PORT=8000, CORS_ORIGINS
+    └── app/
+        ├── main.py                # FastAPI entrypoint with interactive Swagger docs (/docs)
+        ├── models/schemas.py      # Pydantic schemas matching shared/api-contract.json
+        └── services/
+            ├── heat_index.py      # CHRS mathematical calculation
+            ├── xai_engine.py      # Hotspot factor attribution diagnostics
+            ├── simulator.py       # What-If policy simulation engine
+            ├── coolpath_router.py # Microclimate thermal comfort routing algorithm
+            └── nlp_triage.py      # Community report urgency classifier
 ```
 
 ---
 
-## Proposed Changes & File Breakdown
+## 4. Shared API Contracts & Communication Protocol
 
-### Component 1: GeoJSON Datasets & Geometry Builders
+All three phases strictly communicate through the endpoints defined in [shared/api-contract.json](file:///c:/Users/vishal/Desktop/Nexora/shared/api-contract.json):
 
-#### [NEW] [world.json](file:///c:/Users/vishal/Desktop/Nexora/phase-1/src/data/world.json)
-- Lightweight simplified GeoJSON of world countries for Level 1.
-
-#### [NEW] [india.json](file:///c:/Users/vishal/Desktop/Nexora/phase-1/src/data/india.json)
-- GeoJSON of Indian states (Maharashtra, Gujarat, Karnataka, etc.) for Level 2.
-
-#### [NEW] [geoToThree.js](file:///c:/Users/vishal/Desktop/Nexora/phase-1/src/utils/geoToThree.js)
-- Utility converting GeoJSON Polygons and MultiPolygons into `THREE.ShapeGeometry` using `d3-geo` projection.
-- Generates wireframe edge outlines for crisp vector boundaries.
-- Returns bounding box and geographic centroids for camera target calculations.
-
----
-
-### Component 2: Focus State Machine & Camera Stabilization
-
-#### [NEW] [MapFocusManager.js](file:///c:/Users/vishal/Desktop/Nexora/phase-1/src/utils/MapFocusManager.js)
-- Manages 4 discrete focus states:
-  - `LEVEL_WORLD` (Camera distance > 85 units)
-  - `LEVEL_INDIA` (Distance 40–85 units, centered on `[78.96, 20.59]`)
-  - `LEVEL_MAHARASHTRA` (Distance 18–40 units, centered on `[75.71, 19.75]`)
-  - `LEVEL_MUMBAI` (Distance < 18 units, centered on `[72.86, 19.05]`)
-- Monitors camera distance and user look-at target continuously in the render loop.
-- Triggers smooth GSAP transitions:
-  - Gently tweens `camera.position` and `controls.target` to lock into the detected region.
-  - Cross-fades materials: fades unrelated regions to `opacity: 0` while bringing the active region to `opacity: 1`.
-  - Seamlessly reversible when user zooms back out.
+| Endpoint | Method | Primary Handler | Responsibility |
+| :--- | :--- | :--- | :--- |
+| `/api/grid` | `GET` | Phase 2 (MongoDB) | Returns GeoJSON FeatureCollection of 500m micro-grids with risk scores. |
+| `/api/cooling-centers` | `GET` | Phase 2 (MongoDB) | Geospatial `$near` search for nearest shelters and hydration stations. |
+| `/api/reports` | `GET` / `POST` | Phase 2 (MongoDB + Phase 3) | Submits citizen distress report, auto-triages with NLP, saves to MongoDB. |
+| `/api/weather/current` | `GET` | Phase 2 (Open-Meteo) | Fetches ambient metrics, computes live WBGT index and municipal heat alert tier. |
+| `/api/ai/explain/:zone_id` | `GET` | Phase 3 (FastAPI via Phase 2 proxy) | Returns factor attribution breakdown for Explainable AI drawer. |
+| `/api/ai/simulate` | `POST` | Phase 3 (FastAPI via Phase 2 proxy) | Simulates policy interventions (trees, cool roofs, kiosks), returns $\Delta LST$ and $\Delta CHRS$. |
+| `/api/ai/coolpath` | `POST` | Phase 3 (FastAPI via Phase 2 proxy) | Solves dual routing: Shortest Route vs Coolest Route with shade metrics. |
 
 ---
 
-### Component 3: 3D Scene Viewport & Raycasting
+## 5. Independent Development Protocol (Zero-Block Workflow)
 
-#### [NEW] [ThreeMapView.jsx](file:///c:/Users/vishal/Desktop/Nexora/phase-1/src/components/ThreeMapView.jsx)
-- Complete Three.js canvas replacing Leaflet:
-  - `PerspectiveCamera`, `WebGLRenderer` (transparent background matching `#132820`), and `OrbitControls` with zoom/damping limits.
-  - Renders the 3 hierarchical levels:
-    - Level 1: World meshes in muted forest green (`#1b3a2e`, opacity 0.5).
-    - Level 2: Indian states in olive-moss (`#2f523c`), Maharashtra highlighted in lime-tinted sage.
-    - Level 3: Mumbai 500m micro-grids in the reference photo's exact natural choropleth scale:
-      - Low Risk / High Canopy: Deep forest green (`#2f523c`)
-      - Moderate: Medium olive (`#5a7d4a`)
-      - High: Warm olive (`#8fae58`)
-      - Critical Hotspot: Radiant pale lime (`#dff279`)
-  - Raycaster mouse interaction:
-    - Hovering a country/state/hotspot cell illuminates its border.
-    - Clicking a hotspot cell selects it, highlights the cell with a crisp white boundary, updates the Left Column narrative, and triggers XAI inspection!
-  - UI Overlay Elements:
-    - Bottom-right: Minimalist horizontal gradient legend bar (`LOW ────── HIGH`).
-    - Level indicator badge: e.g. `CURRENT FOCUS: MAHARASHTRA / MUMBAI`.
-    - Floating reset camera button (`↺ RESET VIEW`).
+1. **Developer 1 (Frontend)**:
+   - Operates with `VITE_USE_MOCK=true` in `phase-1/.env`.
+   - Uses `phase-1/src/services/mockData.ts` and `phase-1/src/services/api.ts`.
+   - Builds, styles, and verifies the entire UI without waiting for Phase 2 or Phase 3.
+2. **Developer 2 (Core Backend)**:
+   - Runs MongoDB and Express on port `5000`.
+   - Seeds database with `npm run seed` using shared JSON files.
+   - Forwards AI requests to Phase 3; if Phase 3 is not yet active, returns fallback data defined in `aiGatewayService.js`.
+3. **Developer 3 (AI Engine)**:
+   - Runs FastAPI on port `8000`.
+   - Verifies all math, routing, and NLP triage using the interactive Swagger UI at `http://localhost:8000/docs`.
 
 ---
 
-### Component 4: Integration with Main App & Navbar
+## 6. The 10-Minute Seamless Integration Procedure
 
-#### [MODIFY] [Navbar.jsx](file:///c:/Users/vishal/Desktop/Nexora/phase-1/src/components/Navbar.jsx)
-- Top tabs (`WORLD`, `INDIA`, `MAHARASHTRA`, `MUMBAI`, `DHARAVI`, `KURLA`):
-  - Clicking any tab triggers a smooth GSAP camera fly-to directly to that hierarchical level!
-
-#### [MODIFY] [App.jsx](file:///c:/Users/vishal/Desktop/Nexora/phase-1/src/App.jsx)
-- Replace `MapView` with `ThreeMapView`.
-- Pass `selectedZone`, `onSelectZone`, and `activeLevel` props.
-- Keep the exact editorial layout from the reference photo:
-  - Left column: Region spotlight, narrative, and action links (`XAI DETAILS ↗`, `SIMULATE INTERVENTIONS ↗`, `COOLPATH ↗`).
-  - Center: The 3D Three.js canvas.
-  - Right column: Clean vertical telemetry metrics (`194 K`, `44.2°C`, etc.) and `+ / -` zoom buttons wired to the Three.js camera.
-
----
-
-## Verification Plan
-
-### Automated Tests:
-1. Install dependencies:
-   ```bash
-   cd phase-1
-   npm install three gsap d3-geo
+When each developer finishes their phase:
+1. **Developer 2** runs MongoDB and starts Express (`npm run dev` in `/phase-2`).
+2. **Developer 3** starts FastAPI (`uvicorn app.main:app --reload --port 8000` in `/phase-3`).
+3. **Developer 1** edits `phase-1/.env`:
+   ```env
+   VITE_API_BASE_URL=http://localhost:5000
+   VITE_USE_MOCK=false
    ```
-2. Build verification:
-   ```bash
-   npm run build
-   ```
-   *Threshold: 0 syntax or bundling errors.*
+4. **Developer 1** runs `npm run dev` in `/phase-1`.
+5. **Done!** The frontend instantly visualizes live MongoDB data, live Open-Meteo weather, and live FastAPI algorithms with zero code changes.
 
-### Manual & Interactive Verification:
-1. Start dev server:
-   ```bash
-   npm run dev
-   ```
-2. Test hierarchical focus transitions:
-   - [ ] Initial state: World map rendered in deep moss green.
-   - [ ] Zoom toward India: Verify surrounding world countries smoothly fade to opacity 0, India locks into center.
-   - [ ] Zoom toward Maharashtra: Verify other Indian states fade out, Maharashtra isolates.
-   - [ ] Zoom toward Mumbai: Verify Mumbai 500m heat micro-grids render in the exact moss-to-lime choropleth palette.
-   - [ ] Click a hotspot cell (e.g. Dharavi): Verify highlight boundary, left column updates, and clicking `HOTSPOT XAI DIAGNOSTICS ↗` opens the factor drawer.
-   - [ ] Zoom backwards: Verify reverse transition (Mumbai $\rightarrow$ Maharashtra $\rightarrow$ India $\rightarrow$ World) works with buttery-smooth opacity restoration.
-   - [ ] Click top navbar tabs (`INDIA`, `MUMBAI`, `DHARAVI`): Verify programmatic camera fly-to transitions.
+---
+
+## 7. Hackathon Winning Demo Script (Judges Pitch Flow)
+
+1. **The Problem & Hook (30s)**:
+   *"Judges, extreme urban heat is a silent killer. Traditional weather apps report 36°C, but in dense informal settlements like Dharavi, surface temperatures hit 46°C with zero shade. CoolNeighbour AI bridges earth observation, municipal urban planning, and citizen survival."*
+2. **City Command Center & XAI (60s)**:
+   - Display the tactical GIS map. Toggle layers: Heat Risk Index $\rightarrow$ Satellite LST $\rightarrow$ Vegetation Canopy $\rightarrow$ Cooling Shelters.
+   - Click **Zone 1 (Dharavi Hotspot)**: Show the **Explainable AI (XAI)** drawer diagnosing the root causes (+36.2% surface heat, +28.5% informal tin roofs, +22.1% canopy deficit).
+3. **The Urban Planner "What-If" Sandbox (60s)**:
+   - Open What-If Simulator: Drag sliders to add *250 canopy trees*, *8,000 m² cool roofs*, and *3 misting kiosks*.
+   - Watch the predicted temperature drop live by **-2.4°C** and the risk score plunge from **89.4 (Critical) to 63.8 (Moderate)** with budget and CO₂ offset metrics.
+4. **The Citizen Killer Feature: "CoolPath" Navigation (60s)**:
+   - Switch persona to **Citizen Relief Portal**.
+   - Select origin and destination: View **Route A (Shortest: 1.1 km, 94% sun exposure, extreme danger)** vs **Route B (CoolPath: 1.3 km, 74.5% shade canopy, 4.5°C cooler perceived temperature, 2 water kiosks)**.
+5. **Crowdsourced Ground Truth & Rapid AI Triage (45s)**:
+   - Submit a distress report: *"Drinking water tap broken near transit camp crossroad, workers dizzy."*
+   - Show the AI automatically tag it as **EMERGENCY / HYDRATION CRISIS**, recommend municipal water tanker dispatch, and pin it to the live map.
+6. **Closing Impact & SDG Alignment (15s)**:
+   - Show direct alignment with UN SDG 11 (Sustainable Cities) and SDG 13 (Climate Action).
+
+---
+
+## 8. Verification & Validation Plan
+
+### Phase 1 Verification:
+- Run `npm run dev` in `/phase-1`. Verify responsive UI, Leaflet map rendering, layer toggles, What-If sliders, CoolPath modal, and citizen report form.
+- Run `npm run build` to verify zero TypeScript errors.
+
+### Phase 2 Verification:
+- Run `npm run seed` in `/phase-2` to populate MongoDB.
+- Run `npm run dev` in `/phase-2`. Test endpoints:
+  - `GET http://localhost:5000/api/grid`
+  - `GET http://localhost:5000/api/cooling-centers`
+  - `GET http://localhost:5000/api/weather/current`
+  - `POST http://localhost:5000/api/reports`
+
+### Phase 3 Verification:
+- Run `uvicorn app.main:app --reload --port 8000` in `/phase-3`.
+- Open `http://localhost:8000/docs` in browser. Test endpoints:
+  - `GET /api/ai/explain/GRID_MUM_001`
+  - `POST /api/ai/simulate`
+  - `POST /api/ai/coolpath`
+  - `POST /api/ai/triage`
+
+### Unified Integration Verification:
+- Switch `VITE_USE_MOCK=false` in `/phase-1/.env`.
+- Ensure end-to-end data flow: Frontend (5173) $\longleftrightarrow$ Backend (5000) $\longleftrightarrow$ AI Engine (8000).
