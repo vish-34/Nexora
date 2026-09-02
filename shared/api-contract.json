@@ -1,0 +1,167 @@
+{
+  "project": "CoolNeighbour AI (ThermoShield)",
+  "version": "1.0.0",
+  "base_urls": {
+    "frontend_dev": "http://localhost:5173",
+    "backend_core_mern": "http://localhost:5000",
+    "ai_engine_microservice": "http://localhost:8000"
+  },
+  "endpoints": {
+    "heat_grid": {
+      "method": "GET",
+      "path": "/api/grid",
+      "handler": "Phase 2 Core Backend (serves GeoJSON, enriched by Phase 3 or cache)",
+      "queryParams": {
+        "ward": "optional string, e.g. 'G/North'",
+        "minRisk": "optional number, e.g. 70"
+      },
+      "responseExample": {
+        "status": "success",
+        "city": "Mumbai",
+        "total_cells": 5,
+        "features": "GeoJSON FeatureCollection"
+      }
+    },
+    "weather_current": {
+      "method": "GET",
+      "path": "/api/weather/current",
+      "handler": "Phase 2 Core Backend (Open-Meteo live WBGT)",
+      "queryParams": {
+        "lat": 19.0760,
+        "lng": 72.8777
+      },
+      "responseExample": {
+        "city": "Mumbai",
+        "air_temp_c": 37.4,
+        "relative_humidity_pct": 74,
+        "wbgt_c": 33.8,
+        "heat_alert_level": "Red Alert - Extreme Danger",
+        "uv_index": 9.2,
+        "updated_at": "2026-09-02T10:00:00Z"
+      }
+    },
+    "cooling_centers": {
+      "method": "GET",
+      "path": "/api/cooling-centers",
+      "handler": "Phase 2 Core Backend (MongoDB geospatial query)",
+      "queryParams": {
+        "lat": "optional float",
+        "lng": "optional float",
+        "radius_km": "optional float (default 5.0)"
+      },
+      "responseExample": [
+        {
+          "id": "SHELTER_01",
+          "name": "Dharavi Municipal Community AC Hall & Health Post",
+          "category": "Emergency Cooling Shelter",
+          "ward": "G/North",
+          "location": { "lat": 19.0425, "lng": 72.8545 },
+          "capacity": 180,
+          "current_occupancy": 64,
+          "status": "Open",
+          "distance_meters": 350
+        }
+      ]
+    },
+    "citizen_reports_get": {
+      "method": "GET",
+      "path": "/api/reports",
+      "handler": "Phase 2 Core Backend (MongoDB)",
+      "queryParams": {
+        "urgency": "optional (Emergency, Critical, Medium, Low)",
+        "zone_id": "optional"
+      }
+    },
+    "citizen_reports_post": {
+      "method": "POST",
+      "path": "/api/reports",
+      "handler": "Phase 2 Core Backend (saves to DB and calls Phase 3 for NLP triage)",
+      "requestBody": {
+        "reporter_name": "Ramesh Patil",
+        "phone": "+91 98201 XXXXX",
+        "category": "Hydration Crisis",
+        "description": "Drinking water tap broken near transit camp",
+        "location": { "lat": 19.0430, "lng": 72.8550 }
+      },
+      "responseExample": {
+        "id": "REP_004",
+        "status": "Submitted",
+        "ai_triage": {
+          "urgency": "Emergency",
+          "confidence": 0.94,
+          "recommended_action": "Dispatch emergency water tanker"
+        }
+      }
+    },
+    "ai_xai_explain": {
+      "method": "GET",
+      "path": "/api/ai/explain/:zone_id",
+      "handler": "Phase 3 AI Engine",
+      "responseExample": {
+        "zone_id": "GRID_MUM_001",
+        "chrs_risk_score": 89.4,
+        "risk_category": "Critical",
+        "top_drivers": [
+          { "factor": "Surface Temp (LST 43.8°C)", "impact_pct": 36.2, "status": "severe" },
+          { "factor": "Informal Tin Roof Density (82%)", "impact_pct": 28.5, "status": "severe" },
+          { "factor": "Severe Canopy Deficit (3.5% cover)", "impact_pct": 22.1, "status": "severe" },
+          { "factor": "Drinking Water Distance (750m avg)", "impact_pct": 13.2, "status": "warning" }
+        ],
+        "sdg_alignment": ["SDG 11 - Sustainable Cities", "SDG 13 - Climate Action"]
+      }
+    },
+    "ai_whatif_simulate": {
+      "method": "POST",
+      "path": "/api/ai/simulate",
+      "handler": "Phase 3 AI Engine",
+      "requestBody": {
+        "zone_id": "GRID_MUM_001",
+        "interventions": {
+          "canopy_trees_added": 250,
+          "cool_roof_sqm": 8000,
+          "water_kiosks_added": 3
+        }
+      },
+      "responseExample": {
+        "zone_id": "GRID_MUM_001",
+        "original_chrs": 89.4,
+        "simulated_chrs": 63.8,
+        "predicted_lst_drop_c": 2.4,
+        "population_benefited": 42000,
+        "estimated_budget_inr": 1850000,
+        "co2_offset_tons_per_yr": 12.5,
+        "payback_roi_rating": "High Priority"
+      }
+    },
+    "ai_coolpath_route": {
+      "method": "POST",
+      "path": "/api/ai/coolpath",
+      "handler": "Phase 3 AI Engine",
+      "requestBody": {
+        "origin": { "lat": 19.0405, "lng": 72.8525 },
+        "destination": { "lat": 19.0485, "lng": 72.8585 },
+        "mode": "pedestrian"
+      },
+      "responseExample": {
+        "shortest_route": {
+          "distance_meters": 1150,
+          "duration_minutes": 14,
+          "avg_exposure_temp_c": 43.1,
+          "shade_coverage_pct": 8.0,
+          "thermal_strain_index": "High Danger (91/100)",
+          "waypoints": [[72.8525, 19.0405], [72.8550, 19.0440], [72.8585, 19.0485]]
+        },
+        "coolest_route": {
+          "distance_meters": 1320,
+          "duration_minutes": 16,
+          "avg_exposure_temp_c": 38.6,
+          "shade_coverage_pct": 74.5,
+          "thermal_strain_index": "Safe / Tolerable (38/100)",
+          "water_points_enroute": 2,
+          "temp_relief_delta_c": -4.5,
+          "waypoints": [[72.8525, 19.0405], [72.8532, 19.0430], [72.8560, 19.0465], [72.8585, 19.0485]]
+        }
+      }
+    }
+  }
+}

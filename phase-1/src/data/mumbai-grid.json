@@ -1,0 +1,167 @@
+{
+  "type": "FeatureCollection",
+  "city": "Mumbai",
+  "description": "500m micro-grid polygon cells with satellite LST, vegetation NDVI, built-up NDBI, vulnerability index, and calculated CHRS heat risk",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "grid-dharavi",
+      "properties": {
+        "id": "grid-dharavi",
+        "name": "Dharavi Sector 3 / Transit Camp",
+        "level": "microgrid",
+        "parentId": "mumbai-dharavi",
+        "ward": "G/North",
+        "lst_celsius": 43.8,
+        "ndvi": 0.08,
+        "ndbi": 0.78,
+        "population_density_per_sqkm": 68000,
+        "elderly_percentage": 14.5,
+        "informal_housing_ratio": 0.82,
+        "canopy_cover_pct": 3.5,
+        "drinking_water_access_score": 3.2,
+        "chrs_risk_score": 89.4,
+        "risk_level": "Critical",
+        "primary_hazard_driver": "Extreme low albedo sheet-roofing & severe vegetation deficit",
+        "color": "#dff279"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [72.8520, 19.0400], [72.8570, 19.0400], [72.8570, 19.0450],
+            [72.8520, 19.0450], [72.8520, 19.0400]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "grid-kurla",
+      "properties": {
+        "id": "grid-kurla",
+        "name": "Kurla West Station Hub & Bus Depot",
+        "level": "microgrid",
+        "parentId": "mumbai-kurla",
+        "ward": "L Ward",
+        "lst_celsius": 42.1,
+        "ndvi": 0.12,
+        "ndbi": 0.74,
+        "population_density_per_sqkm": 54000,
+        "elderly_percentage": 16.2,
+        "informal_housing_ratio": 0.65,
+        "canopy_cover_pct": 5.2,
+        "drinking_water_access_score": 4.5,
+        "chrs_risk_score": 82.7,
+        "risk_level": "Critical",
+        "primary_hazard_driver": "Asphalt radiation from transit junctions & pedestrian congestion",
+        "color": "#cbe06c"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [72.8700, 19.0650], [72.8750, 19.0650], [72.8750, 19.0700],
+            [72.8700, 19.0700], [72.8700, 19.0650]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "grid-bkc",
+      "properties": {
+        "id": "grid-bkc",
+        "name": "Bandra Kurla Complex (BKC) G-Block",
+        "level": "microgrid",
+        "parentId": "mumbai-bkc",
+        "ward": "H/East",
+        "lst_celsius": 39.5,
+        "ndvi": 0.28,
+        "ndbi": 0.62,
+        "population_density_per_sqkm": 18000,
+        "elderly_percentage": 9.1,
+        "informal_housing_ratio": 0.05,
+        "canopy_cover_pct": 18.0,
+        "drinking_water_access_score": 8.8,
+        "chrs_risk_score": 52.3,
+        "risk_level": "Moderate",
+        "primary_hazard_driver": "Glass facade reflection countered by landscaped corridors",
+        "color": "#8fae58"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [72.8600, 19.0600], [72.8680, 19.0600], [72.8680, 19.0660],
+            [72.8600, 19.0660], [72.8600, 19.0600]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "grid-bandra",
+      "properties": {
+        "id": "grid-bandra",
+        "name": "Bandra West / Carter Road Coastal Fringe",
+        "level": "microgrid",
+        "parentId": "mumbai-bandra",
+        "ward": "H/West",
+        "lst_celsius": 33.2,
+        "ndvi": 0.45,
+        "ndbi": 0.38,
+        "population_density_per_sqkm": 24000,
+        "elderly_percentage": 18.0,
+        "informal_housing_ratio": 0.12,
+        "canopy_cover_pct": 32.5,
+        "drinking_water_access_score": 9.1,
+        "chrs_risk_score": 31.0,
+        "risk_level": "Low",
+        "primary_hazard_driver": "Marine sea breeze buffering and dense mature tree canopy",
+        "color": "#3b684b"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [72.8250, 19.0550], [72.8330, 19.0550], [72.8330, 19.0620],
+            [72.8250, 19.0620], [72.8250, 19.0550]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "grid-mankhurd",
+      "properties": {
+        "id": "grid-mankhurd",
+        "name": "Govandi - Mankhurd Slum Cluster",
+        "level": "microgrid",
+        "parentId": "mumbai-mankhurd",
+        "ward": "M/East",
+        "lst_celsius": 44.2,
+        "ndvi": 0.05,
+        "ndbi": 0.81,
+        "population_density_per_sqkm": 72000,
+        "elderly_percentage": 13.8,
+        "informal_housing_ratio": 0.89,
+        "canopy_cover_pct": 2.1,
+        "drinking_water_access_score": 2.7,
+        "chrs_risk_score": 93.6,
+        "risk_level": "Critical",
+        "primary_hazard_driver": "High informal tin-roof density, zero canopy, near Deonar proximity",
+        "color": "#e9f78b"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [72.9250, 19.0450], [72.9330, 19.0450], [72.9330, 19.0520],
+            [72.9250, 19.0520], [72.9250, 19.0450]
+          ]
+        ]
+      }
+    }
+  ]
+}
