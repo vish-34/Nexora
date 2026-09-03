@@ -6,6 +6,8 @@ const morgan = require("morgan");
 const { WebSocketServer, WebSocket } = require("ws");
 
 const connectDB = require("./config/db");
+const HeatGrid = require("./models/HeatGrid");
+const { seedDatabase } = require("./utils/seedData");
 const { notFound, errorHandler } = require("./middleware/errorHandler");
 
 const gridRoutes = require("./routes/gridRoutes");
@@ -21,7 +23,20 @@ const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
 
-connectDB();
+// Initialize DB and auto-seed if empty
+connectDB().then(async () => {
+  try {
+    const count = await HeatGrid.countDocuments();
+    if (count === 0) {
+      console.log("[Auto-Seed] HeatGrid collection is empty. Auto-seeding initial dataset...");
+      await seedDatabase({ clearExisting: false });
+    } else {
+      console.log(`[Auto-Seed] Database already populated with ${count} heat grid cells.`);
+    }
+  } catch (err) {
+    console.warn("[Auto-Seed] Check skipped or failed:", err.message);
+  }
+});
 
 app.use(cors({ origin: process.env.CLIENT_ORIGIN || "*" }));
 app.use(express.json({ limit: "4mb" }));
@@ -56,6 +71,21 @@ app.get(["/api/health", "/api/v1/health"], (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+// Admin / Web seed trigger endpoint (No paid shell needed!)
+app.get(["/api/seed", "/api/v1/seed"], async (req, res) => {
+  try {
+    const result = await seedDatabase({ clearExisting: req.query.force === "true" });
+    res.json({
+      status: "success",
+      message: "Database seed operation executed",
+      result,
+    });
+  } catch (err) {
+    res.status(500).json({ status: "error", error: err.message });
+  }
+});
+
 
 app.use(["/api/grid", "/api/v1/heatgrid"], gridRoutes);
 app.use(["/api/cooling-centers", "/api/v1/shelters"], shelterRoutes);

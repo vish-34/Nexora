@@ -8,19 +8,37 @@ const CoolingCenter = require("../models/CoolingCenter");
 const CitizenReport = require("../models/CitizenReport");
 
 function loadJson(sharedRelPath, fallbackRelPath) {
-  const sharedPath = path.resolve(__dirname, sharedRelPath);
-  if (fs.existsSync(sharedPath)) {
-    return JSON.parse(fs.readFileSync(sharedPath, "utf-8"));
+  const possiblePaths = [
+    path.resolve(__dirname, sharedRelPath),
+    path.resolve(__dirname, fallbackRelPath),
+    path.resolve(__dirname, "../../../shared", path.basename(sharedRelPath)),
+    path.resolve(__dirname, "../../data", path.basename(fallbackRelPath)),
+    path.resolve(process.cwd(), "data", path.basename(fallbackRelPath)),
+    path.resolve(process.cwd(), "../shared", path.basename(sharedRelPath)),
+  ];
+
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) {
+      try {
+        return JSON.parse(fs.readFileSync(p, "utf-8"));
+      } catch (err) {
+        console.warn(`Error reading ${p}:`, err.message);
+      }
+    }
   }
-  const fallbackPath = path.resolve(__dirname, fallbackRelPath);
-  if (fs.existsSync(fallbackPath)) {
-    return JSON.parse(fs.readFileSync(fallbackPath, "utf-8"));
-  }
-  throw new Error(`Could not find seed file at ${sharedPath} or ${fallbackPath}`);
+  console.warn(`Could not find seed file: ${sharedRelPath} / ${fallbackRelPath}`);
+  return [];
 }
 
-async function seed() {
-  await connectDB();
+async function seedDatabase(options = { clearExisting: false }) {
+  if (mongoose.connection.readyState !== 1) {
+    await connectDB();
+  }
+
+  if (mongoose.connection.readyState !== 1) {
+    console.log("MongoDB is not reachable. Operating in resilient in-memory mode.");
+    return { success: false, reason: "DB not connected" };
+  }
 
   const gridData = loadJson(
     "../../../../shared/mumbai_heat_grid.json",
@@ -35,11 +53,17 @@ async function seed() {
     "../../data/sample_reports.sample.json"
   );
 
-  if (mongoose.connection.readyState === 1) {
+  if (options.clearExisting) {
     await HeatGrid.deleteMany({});
     await CoolingCenter.deleteMany({});
     await CitizenReport.deleteMany({});
+  }
 
+  let seededGrid = 0;
+  let seededShelters = 0;
+  let seededReports = 0;
+
+  if (gridData.length > 0) {
     const gridDocs = gridData.map((c) => ({
       ...c,
       zone_id: c.zone_id || c.cellId,
@@ -53,10 +77,16 @@ async function seed() {
         source: "sourced_landsat8_sentinel2",
       },
     }));
-
     await HeatGrid.insertMany(gridDocs);
-    await CoolingCenter.insertMany(shelterData);
+    seededGrid = gridDocs.length;
+  }
 
+  if (shelterData.length > 0) {
+    await CoolingCenter.insertMany(shelterData);
+    seededShelters = shelterData.length;
+  }
+
+  if (reportData.length > 0) {
     const reportDocs = reportData.map((r, i) => {
       const lat = r.location?.lat ?? (Array.isArray(r.location?.coordinates) ? r.location.coordinates[1] : 19.043);
       const lng = r.location?.lng ?? (Array.isArray(r.location?.coordinates) ? r.location.coordinates[0] : 72.855);
@@ -79,23 +109,32 @@ async function seed() {
         created_at: new Date(),
       };
     });
-
     await CitizenReport.insertMany(reportDocs);
-
-    console.log(`Seeded ${gridDocs.length} heat grid cells into MongoDB`);
-    console.log(`Seeded ${shelterData.length} cooling centers into MongoDB`);
-    console.log(`Seeded ${reportDocs.length} citizen reports into MongoDB`);
-
-    await mongoose.connection.close();
-    process.exit(0);
-  } else {
-    console.log("MongoDB is not reachable at the configured URI.");
-    console.log(`Validated ${gridData.length} heat grid cells, ${shelterData.length} cooling centers, and ${reportData.length} citizen reports for in-memory serving.`);
-    process.exit(0);
+    seededReports = reportDocs.length;
   }
+
+  console.log(`[Auto-Seed] Successfully seeded: ${seededGrid} heat grid cells, ${seededShelters} shelters, ${seededReports} citizen reports.`);
+  return {
+    success: true,
+    gridCount: seededGrid,
+    sheltersCount: seededShelters,
+    reportsCount: seededReports,
+  };
 }
 
-seed().catch((err) => {
-  console.error("Seed script encountered an error:", err);
-  process.exit(1);
-});
+if (require.main === module) {
+  seedDatabase({ clearExisting: true })
+    .then(async () => {
+      if (mongoose.connection.readyState === 1) {
+        await mongoose.connection.close();
+      }
+      process.exit(0);
+    })
+    .catch((err) => {
+      console.error("Seed script encountered an error:", err);
+      process.exit(1);
+    });
+}
+
+module.exports = { seedDatabase };
+
