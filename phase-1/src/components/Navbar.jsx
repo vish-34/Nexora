@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Plus, Navigation, SlidersHorizontal, ChevronDown, Shield } from 'lucide-react';
+import { Menu, Plus, Navigation, SlidersHorizontal, ChevronDown, Shield, LogOut } from 'lucide-react';
 
 export const Navbar = ({
   activeWard,
@@ -12,7 +12,10 @@ export const Navbar = ({
   onOpenWhatIfModal,
   isVisible = true,
   onMouseEnter,
-  onMouseLeave
+  onMouseLeave,
+  currentUser,
+  onLogout,
+  onOpenAuthModal
 }) => {
   // Clean Core Hierarchy Navigation
   const coreHierarchy = [
@@ -69,11 +72,10 @@ export const Navbar = ({
     <header
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      className={`fixed top-0 left-0 right-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-slate-200/90 px-8 py-3.5 shadow-sm transition-all duration-500 ease-out ${
-        isVisible
+      className={`fixed top-0 left-0 right-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-slate-200/90 px-8 py-3.5 shadow-sm transition-all duration-500 ease-out ${isVisible
           ? 'translate-y-0 opacity-100 pointer-events-auto'
           : '-translate-y-full opacity-0 pointer-events-none'
-      }`}
+        }`}
     >
       <div className="max-w-[1680px] mx-auto flex items-center justify-between gap-6">
         {/* Left: Brand Mark */}
@@ -84,7 +86,7 @@ export const Navbar = ({
           >
             <Menu className="w-5 h-5" />
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 select-none">
             <span className="text-sm font-bold tracking-tight text-slate-900 font-display uppercase">
               CoolNeighbour
             </span>
@@ -102,9 +104,8 @@ export const Navbar = ({
               <button
                 key={region.id}
                 onClick={() => setActiveWard(region.id)}
-                className={`relative py-1 transition-colors uppercase cursor-pointer ${
-                  isActive ? 'text-slate-950 font-bold' : 'text-slate-500 hover:text-slate-900'
-                }`}
+                className={`relative py-1 transition-colors uppercase cursor-pointer ${isActive ? 'text-slate-950 font-bold' : 'text-slate-500 hover:text-slate-900'
+                  }`}
               >
                 {region.label}
                 {isActive && (
@@ -122,11 +123,10 @@ export const Navbar = ({
                 if (e.target.value) setActiveWard(e.target.value);
               }}
               aria-label="Select Indian State"
-              className={`appearance-none bg-white hover:bg-slate-50 text-[11px] font-semibold uppercase py-1.5 pl-3.5 pr-8 rounded-full border transition-all cursor-pointer shadow-sm focus:outline-none ${
-                isStateSelected
+              className={`appearance-none bg-white hover:bg-slate-50 text-[11px] font-semibold uppercase py-1.5 pl-3.5 pr-8 rounded-full border transition-all cursor-pointer shadow-sm focus:outline-none ${isStateSelected
                   ? 'text-orange-600 border-orange-300 bg-orange-50/50 font-bold'
                   : 'text-slate-700 border-slate-200 hover:border-slate-300'
-              }`}
+                }`}
             >
               <option value="" disabled className="bg-white text-slate-400">
                 {isStateSelected ? `STATE: ${selectedStateName?.toUpperCase()}` : 'SELECT STATE (36 UTs)'}
@@ -144,45 +144,28 @@ export const Navbar = ({
           <div className="flex items-center bg-slate-100 p-0.5 rounded-full border border-slate-200/90 shadow-inner">
             <button
               onClick={() => setActivePersona('admin')}
-              className={`text-[11px] font-mono px-3.5 py-1 rounded-full transition-all cursor-pointer flex items-center gap-1.5 ${
-                activePersona === 'admin'
+              className={`text-[11px] font-mono px-3.5 py-1 rounded-full transition-all cursor-pointer flex items-center gap-1.5 ${activePersona === 'admin'
                   ? 'bg-white text-slate-900 font-bold shadow-sm border border-slate-200/70'
                   : 'text-slate-500 hover:text-slate-900'
-              }`}
+                }`}
             >
               <Shield className="w-3 h-3 text-slate-700" />
               <span>ADMIN HUD</span>
             </button>
             <button
               onClick={() => setActivePersona('citizen')}
-              className={`text-[11px] font-mono px-3.5 py-1 rounded-full transition-all cursor-pointer ${
-                activePersona === 'citizen'
+              className={`text-[11px] font-mono px-3.5 py-1 rounded-full transition-all cursor-pointer ${activePersona === 'citizen'
                   ? 'bg-white text-slate-900 font-bold shadow-sm border border-slate-200/70'
                   : 'text-slate-500 hover:text-slate-900'
-              }`}
+                }`}
             >
               CITIZEN
             </button>
           </div>
         </nav>
 
-        {/* Right: Weather Pill + CoolPath + SOS + Sliders */}
+        {/* Right: Actions & Seamless Logout Button */}
         <div className="flex items-center gap-3 shrink-0">
-          <div className="hidden xl:flex items-center gap-2 text-xs font-mono text-slate-700 bg-white border border-slate-200/90 px-3.5 py-1.5 rounded-full shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-orange-500"></span>
-            <span>{weather?.temp_c ?? 33.8}°C</span>
-            <span className="text-slate-300">|</span>
-            <span className="text-orange-600 text-[11px] uppercase tracking-wider font-bold">HIGH HEAT</span>
-          </div>
-
-          <button
-            onClick={onOpenCoolPathModal}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200/90 shadow-sm transition-all cursor-pointer"
-          >
-            <Navigation className="w-3.5 h-3.5 text-slate-600" />
-            <span>CoolPath</span>
-          </button>
-
           <button
             onClick={onOpenReportModal}
             className="flex items-center gap-1 px-3.5 py-1.5 rounded-full text-xs font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200/90 shadow-sm transition-all cursor-pointer"
@@ -197,6 +180,23 @@ export const Navbar = ({
             className="p-2 text-slate-600 hover:text-slate-950 bg-white hover:bg-slate-50 rounded-lg transition-colors border border-slate-200/90 shadow-sm cursor-pointer"
           >
             <SlidersHorizontal className="w-4 h-4" />
+          </button>
+
+          {currentUser && (
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 rounded-full border border-slate-200">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              <span className="max-w-[120px] truncate">{currentUser.name || currentUser.email}</span>
+            </div>
+          )}
+
+          {/* Seamless Logout Button */}
+          <button
+            onClick={onLogout}
+            title="Sign out of CoolNeighbour"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold text-slate-700 hover:text-red-600 bg-white hover:bg-red-50 border border-slate-200/90 hover:border-red-200 shadow-sm transition-all cursor-pointer"
+          >
+            <LogOut className="w-3.5 h-3.5 text-slate-500 hover:text-red-500" />
+            <span>Logout</span>
           </button>
         </div>
       </div>

@@ -11,8 +11,19 @@ import { ReportModal } from './components/ReportModal.jsx';
 import { SosDistressModal } from './components/SosDistressModal.jsx';
 import { AiCopilotCard } from './components/AiCopilotCard.jsx';
 import { api } from './services/api.js';
+import { HeroLanding, AuthModal } from './login/index.js';
 
 export const App = () => {
+  const [currentUser, setCurrentUser] = useState(() => api.getStoredUser());
+  const [currentView, setCurrentView] = useState('landing'); // 'landing' | 'app'
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  const handleLogout = () => {
+    api.logout();
+    setCurrentUser(null);
+    setCurrentView('landing');
+  };
+
   const [activeWard, setActiveWard] = useState('india');
   const [activePersona, setActivePersona] = useState('admin'); // 'admin' | 'citizen'
   const [activeLayer, setActiveLayer] = useState(null); // null = default clean, 'chrs' | 'lst' | 'ndvi'
@@ -172,15 +183,35 @@ export const App = () => {
 
   return (
     <div className="relative w-screen h-screen overflow-hidden bg-[#f8fafc] text-slate-900 font-sans select-none">
+      {/* Full-Screen Landing Page Overlay (3D Engine Preloaded in Background on Site Load) */}
+      <div
+        className={`fixed inset-0 z-40 bg-[#f8fafc] overflow-hidden transition-all duration-500 ease-in-out ${
+          currentView === 'landing'
+            ? 'opacity-100 pointer-events-auto visible scale-100'
+            : 'opacity-0 pointer-events-none invisible scale-[0.99]'
+        }`}
+      >
+        <HeroLanding
+          onExploreMap={() => setCurrentView('app')}
+          onOpenLogin={() => setIsAuthModalOpen(true)}
+          onOpenSolutions={() => {
+            setActiveLayer('chrs');
+            setCurrentView('app');
+          }}
+          currentUser={currentUser}
+          onLogout={handleLogout}
+        />
+      </div>
+
       {/* Invisible Top Hover Trigger Zone */}
       <div
         onMouseEnter={() => setIsNavbarVisible(true)}
         className="fixed top-0 left-0 right-0 h-4 z-40 pointer-events-auto"
       />
 
-      {/* Floating Animated Navbar (Clean flat transparent, slides up/down) */}
+      {/* Floating Animated Navbar (Visible when in App view) */}
       <Navbar
-        isVisible={isNavbarVisible}
+        isVisible={isNavbarVisible && currentView === 'app'}
         onMouseEnter={() => {
           isHoveringNavbarRef.current = true;
           setIsNavbarVisible(true);
@@ -200,6 +231,9 @@ export const App = () => {
         onOpenReportModal={() => setIsReportModalOpen(true)}
         onOpenCoolPathModal={() => setIsCoolPathOpen(true)}
         onOpenWhatIfModal={() => setIsWhatIfOpen(true)}
+        currentUser={currentUser}
+        onLogout={handleLogout}
+        onOpenAuthModal={() => setIsAuthModalOpen(true)}
       />
 
       {/* Admin Persona: Dual Side Telemetry Drawers */}
@@ -296,31 +330,33 @@ export const App = () => {
         )}
       </main>
 
-      {/* AI Climate Copilot (Floating in Bottom-Right Corner) */}
-      <AiCopilotCard
-        selectedZone={selectedZone}
-        activeLayer={activeLayer}
-        activePersona={activePersona}
-        weather={weather}
-        shelters={shelters}
-        reports={reports}
-        onSetMapLayer={(layer) => {
-          setActiveLayer(layer === 'default' ? null : layer);
-        }}
-        onOpenXai={() => setIsXaiOpen(true)}
-        onOpenSimulator={() => setIsWhatIfOpen(true)}
-        onOpenCoolPath={() => setIsCoolPathOpen(true)}
-        onSetPersona={setActivePersona}
-        onResetIndia={() => {
-          setActiveWard('india');
-          setActiveLayer(null);
-          mapEngineRef.current?.resetView();
-        }}
-        onFocusRegion={(regionId) => {
-          setActiveWard(regionId);
-          mapEngineRef.current?.focusRegion(regionId, { animateZoom: true, force: true });
-        }}
-      />
+      {/* AI Climate Copilot (Floating in Bottom-Right Corner in App view only) */}
+      {currentView === 'app' && (
+        <AiCopilotCard
+          selectedZone={selectedZone}
+          activeLayer={activeLayer}
+          activePersona={activePersona}
+          weather={weather}
+          shelters={shelters}
+          reports={reports}
+          onSetMapLayer={(layer) => {
+            setActiveLayer(layer === 'default' ? null : layer);
+          }}
+          onOpenXai={() => setIsXaiOpen(true)}
+          onOpenSimulator={() => setIsWhatIfOpen(true)}
+          onOpenCoolPath={() => setIsCoolPathOpen(true)}
+          onSetPersona={setActivePersona}
+          onResetIndia={() => {
+            setActiveWard('india');
+            setActiveLayer(null);
+            mapEngineRef.current?.resetView();
+          }}
+          onFocusRegion={(regionId) => {
+            setActiveWard(regionId);
+            mapEngineRef.current?.focusRegion(regionId, { animateZoom: true, force: true });
+          }}
+        />
+      )}
 
       {/* Slide-out Explainable AI (XAI) Drawer */}
       <XaiDrawer
@@ -377,6 +413,16 @@ export const App = () => {
           }}
         />
       )}
+
+      {/* Global Auth Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={(user) => {
+          setCurrentUser(user);
+          setCurrentView('app');
+        }}
+      />
     </div>
   );
 };

@@ -17,6 +17,7 @@ const proposalRoutes = require("./routes/proposals.routes");
 const weatherRoutes = require("./routes/weatherRoutes");
 const aiRoutes = require("./routes/aiRoutes");
 const pinRoutes = require("./routes/pinRoutes");
+const authRoutes = require("./routes/authRoutes");
 const { setWsBroadcaster } = require("./controllers/reportController");
 
 const app = express();
@@ -87,6 +88,7 @@ app.get(["/api/seed", "/api/v1/seed"], async (req, res) => {
 });
 
 
+app.use(["/api/auth", "/api/v1/auth"], authRoutes);
 app.use(["/api/grid", "/api/v1/heatgrid"], gridRoutes);
 app.use(["/api/cooling-centers", "/api/v1/shelters"], shelterRoutes);
 app.use(["/api/reports", "/api/v1/reports"], reportRoutes);

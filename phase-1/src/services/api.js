@@ -19,6 +19,19 @@ const apiClient = axios.create({
   }
 });
 
+// Attach Authorization token from localStorage if available
+apiClient.interceptors.request.use((config) => {
+  try {
+    const token = localStorage.getItem('coolneighbour_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  } catch (e) {
+    // ignore in environments without localStorage
+  }
+  return config;
+});
+
 // Helper for simulated network delay in mock mode
 const delay = (ms = 150) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -337,6 +350,85 @@ export const api = {
     } catch (err) {
       console.warn('CoolPath engine unavailable, returning mock dual route comparison', err);
       return mockCoolPathData;
+    }
+  },
+
+  /**
+   * User Authentication: Sign Up
+   */
+  async signup(userData) {
+    try {
+      const res = await apiClient.post('/api/auth/signup', userData);
+      if (res.data.token) {
+        localStorage.setItem('coolneighbour_token', res.data.token);
+        localStorage.setItem('coolneighbour_user', JSON.stringify(res.data.user));
+      }
+      return res.data;
+    } catch (err) {
+      const message = err.response?.data?.message || err.response?.data?.error || err.message || 'Signup failed';
+      throw new Error(message);
+    }
+  },
+
+  /**
+   * User Authentication: Sign In
+   */
+  async signin(credentials) {
+    try {
+      const res = await apiClient.post('/api/auth/signin', credentials);
+      if (res.data.token) {
+        localStorage.setItem('coolneighbour_token', res.data.token);
+        localStorage.setItem('coolneighbour_user', JSON.stringify(res.data.user));
+      }
+      return res.data;
+    } catch (err) {
+      const message = err.response?.data?.message || err.response?.data?.error || err.message || 'Invalid email or password';
+      throw new Error(message);
+    }
+  },
+
+  /**
+   * Logout and clear local storage & notify backend
+   */
+  async logout() {
+    try {
+      await apiClient.post('/api/auth/logout').catch(() => {});
+    } catch (e) {
+      // ignore
+    } finally {
+      try {
+        localStorage.removeItem('coolneighbour_token');
+        localStorage.removeItem('coolneighbour_user');
+      } catch (e) {
+        // ignore
+      }
+    }
+  },
+
+  /**
+   * Get Cached User
+   */
+  getStoredUser() {
+    try {
+      const u = localStorage.getItem('coolneighbour_user');
+      return u ? JSON.parse(u) : null;
+    } catch (e) {
+      return null;
+    }
+  },
+
+  /**
+   * Get Current Profile from Backend
+   */
+  async getProfile() {
+    try {
+      const token = localStorage.getItem('coolneighbour_token');
+      if (!token) return null;
+      const res = await apiClient.get('/api/auth/me');
+      return res.data.user;
+    } catch (err) {
+      this.logout();
+      return null;
     }
   }
 };
